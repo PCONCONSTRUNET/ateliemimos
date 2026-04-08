@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { productImages } from "@/lib/sample-images";
 
 interface Product {
   id: string;
@@ -18,16 +19,17 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
+  const imageUrl = product.imagem || productImages[product.nome] || null;
+
   return (
     <button
       onClick={onClick}
       className="group w-full text-left bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
     >
-      {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
-        {product.imagem ? (
+        {imageUrl ? (
           <img
-            src={product.imagem}
+            src={imageUrl}
             alt={product.nome}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -37,8 +39,6 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
             Sem imagem
           </div>
         )}
-
-        {/* Tags */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.destaque && (
             <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full">
@@ -47,8 +47,6 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
           )}
         </div>
       </div>
-
-      {/* Info */}
       <div className="p-3 space-y-1">
         <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
           {product.nome}
