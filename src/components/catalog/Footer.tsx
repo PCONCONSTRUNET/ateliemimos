@@ -7,8 +7,8 @@ interface FooterProps {
 
 export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
   return (
-    <footer className="px-4 pb-6 pt-2">
-      <div className="rounded-2xl bg-gradient-to-t from-primary/15 via-primary/5 to-card border border-border p-8 text-center space-y-4">
+    <footer className="w-full">
+      <div className="bg-gradient-to-t from-primary/15 via-primary/5 to-card border-t border-border p-8 text-center space-y-4">
         {/* Divider line */}
         <div className="w-16 h-[2px] bg-primary/30 mx-auto mb-2" />
 
