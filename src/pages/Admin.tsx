@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Plus, Pencil, Trash2, Upload } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { LogOut, Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 interface Category {
@@ -50,7 +50,6 @@ const Admin = () => {
     imagem: null as File | null,
   });
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
@@ -82,14 +81,13 @@ const Admin = () => {
     const fileName = `${folder}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("images").upload(fileName, file);
     if (error) {
-      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+      toast.error("Erro no upload: " + error.message);
       return null;
     }
     const { data } = supabase.storage.from("images").getPublicUrl(fileName);
     return data.publicUrl;
   };
 
-  // --- Categories ---
   const openCatModal = (cat?: Category) => {
     if (cat) {
       setEditingCat(cat);
@@ -113,17 +111,16 @@ const Admin = () => {
     }
     setCatModal(false);
     fetchAll();
-    toast({ title: editingCat ? "Categoria atualizada!" : "Categoria criada!" });
+    toast.success(editingCat ? "Categoria atualizada!" : "Categoria criada!");
   };
 
   const deleteCat = async (id: string) => {
     if (!confirm("Excluir esta categoria?")) return;
     await supabase.from("categories").delete().eq("id", id);
     fetchAll();
-    toast({ title: "Categoria excluída!" });
+    toast.success("Categoria excluída!");
   };
 
-  // --- Products ---
   const openProdModal = (prod?: Product) => {
     if (prod) {
       setEditingProd(prod);
@@ -164,14 +161,14 @@ const Admin = () => {
     }
     setProdModal(false);
     fetchAll();
-    toast({ title: editingProd ? "Produto atualizado!" : "Produto criado!" });
+    toast.success(editingProd ? "Produto atualizado!" : "Produto criado!");
   };
 
   const deleteProd = async (id: string) => {
     if (!confirm("Excluir este produto?")) return;
     await supabase.from("products").delete().eq("id", id);
     fetchAll();
-    toast({ title: "Produto excluído!" });
+    toast.success("Produto excluído!");
   };
 
   const handleLogout = async () => {
@@ -183,7 +180,6 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -191,8 +187,7 @@ const Admin = () => {
             <h1 className="font-serif text-lg text-foreground">Painel Admin</h1>
           </div>
           <Button variant="ghost" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" />
-            Sair
+            <LogOut className="h-4 w-4" /> Sair
           </Button>
         </div>
       </header>
@@ -204,7 +199,6 @@ const Admin = () => {
             <TabsTrigger value="categories">Categorias ({categories.length})</TabsTrigger>
           </TabsList>
 
-          {/* Products Tab */}
           <TabsContent value="products">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-serif">Produtos</h2>
@@ -219,9 +213,7 @@ const Admin = () => {
                     {p.imagem ? (
                       <img src={p.imagem} alt={p.nome} className="w-16 h-16 rounded-md object-cover" />
                     ) : (
-                      <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                        Sem img
-                      </div>
+                      <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">Sem img</div>
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{p.nome}</h3>
@@ -236,23 +228,16 @@ const Admin = () => {
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openProdModal(p)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteProd(p.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => openProdModal(p)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteProd(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              {products.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">Nenhum produto cadastrado.</p>
-              )}
+              {products.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhum produto cadastrado.</p>}
             </div>
           </TabsContent>
 
-          {/* Categories Tab */}
           <TabsContent value="categories">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-serif">Categorias</h2>
@@ -271,19 +256,13 @@ const Admin = () => {
                     )}
                     <h3 className="flex-1 font-medium">{c.nome}</h3>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openCatModal(c)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteCat(c.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => openCatModal(c)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteCat(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              {categories.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">Nenhuma categoria cadastrada.</p>
-              )}
+              {categories.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhuma categoria cadastrada.</p>}
             </div>
           </TabsContent>
         </Tabs>
@@ -294,20 +273,13 @@ const Admin = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif">{editingCat ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
+            <DialogDescription className="sr-only">Formulário de categoria</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Nome da categoria"
-              value={catForm.nome}
-              onChange={(e) => setCatForm({ ...catForm, nome: e.target.value })}
-            />
+            <Input placeholder="Nome da categoria" value={catForm.nome} onChange={(e) => setCatForm({ ...catForm, nome: e.target.value })} />
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Imagem</label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setCatForm({ ...catForm, imagem: e.target.files?.[0] || null })}
-              />
+              <Input type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imagem: e.target.files?.[0] || null })} />
             </div>
             <Button onClick={saveCat} className="w-full">Salvar</Button>
           </div>
@@ -319,59 +291,29 @@ const Admin = () => {
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif">{editingProd ? "Editar Produto" : "Novo Produto"}</DialogTitle>
+            <DialogDescription className="sr-only">Formulário de produto</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Nome do produto"
-              value={prodForm.nome}
-              onChange={(e) => setProdForm({ ...prodForm, nome: e.target.value })}
-            />
-            <Input
-              placeholder="Preço (ex: 89.90)"
-              type="number"
-              step="0.01"
-              value={prodForm.preco}
-              onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })}
-            />
-            <Textarea
-              placeholder="Descrição do produto"
-              value={prodForm.descricao}
-              onChange={(e) => setProdForm({ ...prodForm, descricao: e.target.value })}
-            />
-            <Select
-              value={prodForm.categoria_id}
-              onValueChange={(v) => setProdForm({ ...prodForm, categoria_id: v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
+            <Input placeholder="Nome do produto" value={prodForm.nome} onChange={(e) => setProdForm({ ...prodForm, nome: e.target.value })} />
+            <Input placeholder="Preço (ex: 89.90)" type="number" step="0.01" value={prodForm.preco} onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })} />
+            <Textarea placeholder="Descrição do produto" value={prodForm.descricao} onChange={(e) => setProdForm({ ...prodForm, descricao: e.target.value })} />
+            <Select value={prodForm.categoria_id} onValueChange={(v) => setProdForm({ ...prodForm, categoria_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
               <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
-                ))}
+                {categories.map((c) => (<SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>))}
               </SelectContent>
             </Select>
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Imagem</label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })}
-              />
+              <Input type="file" accept="image/*" onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })} />
             </div>
             <div className="flex items-center gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox
-                  checked={prodForm.destaque}
-                  onCheckedChange={(c) => setProdForm({ ...prodForm, destaque: !!c })}
-                />
+                <Checkbox checked={prodForm.destaque} onCheckedChange={(c) => setProdForm({ ...prodForm, destaque: !!c })} />
                 <span className="text-sm">Destaque</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox
-                  checked={prodForm.disponivel}
-                  onCheckedChange={(c) => setProdForm({ ...prodForm, disponivel: !!c })}
-                />
+                <Checkbox checked={prodForm.disponivel} onCheckedChange={(c) => setProdForm({ ...prodForm, disponivel: !!c })} />
                 <span className="text-sm">Disponível</span>
               </label>
             </div>
