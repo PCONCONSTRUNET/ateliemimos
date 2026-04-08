@@ -34,12 +34,6 @@ export const HeroBanner = () => {
           Fale conosco
         </button>
 
-        <div className="flex justify-center gap-2 pt-2">
-          <span className="w-2 h-2 rounded-full bg-primary" />
-          <span className="w-2 h-2 rounded-full bg-primary/40" />
-          <span className="w-2 h-2 rounded-full bg-primary/40" />
-          <span className="w-2 h-2 rounded-full bg-border" />
-        </div>
       </div>
     </section>
   );
