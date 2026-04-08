@@ -7,6 +7,7 @@ import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { ProductModal } from "@/components/catalog/ProductModal";
 import { WhatsAppButton } from "@/components/catalog/WhatsAppButton";
 import { Footer } from "@/components/catalog/Footer";
+import { useNavigate } from "react-router-dom";
 
 interface Category {
   id: string;
@@ -28,10 +29,10 @@ interface Product {
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -49,18 +50,14 @@ const Index = () => {
 
   const featuredProducts = products.filter((p) => p.destaque);
 
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory = !selectedCategory || p.categoria_id === selectedCategory;
-    const matchesSearch = !searchQuery || p.nome.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const searchResults = searchQuery
+    ? products.filter((p) => p.nome.toLowerCase().includes(searchQuery.toLowerCase()))
+    : null;
 
   const getCategoryName = (id: string | null) => {
     if (!id) return "";
     return categories.find((c) => c.id === id)?.nome || "";
   };
-
-  const showHome = !selectedCategory && !searchQuery;
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,16 +65,31 @@ const Index = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         categories={categories}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={(id) => id && navigate(`/categoria/${id}`)}
       />
 
       {/* Hero */}
-      {showHome && <HeroBanner />}
+      {!searchQuery && <HeroBanner />}
 
       <main className="container mx-auto px-4 pb-24">
-
-        {/* === HOME VIEW === */}
-        {showHome && (
+        {/* Search results */}
+        {searchResults ? (
+          <section className="py-8">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-serif text-foreground font-semibold">
+                Resultados para "{searchQuery}"
+              </h2>
+              <button onClick={() => setSearchQuery("")} className="text-sm text-primary hover:underline">
+                ← Voltar
+              </button>
+            </div>
+            {searchResults.length === 0 ? (
+              <p className="text-center text-muted-foreground py-12">Nenhum produto encontrado.</p>
+            ) : (
+              <ProductGrid products={searchResults} onProductClick={setSelectedProduct} />
+            )}
+          </section>
+        ) : (
           <>
             {/* Featured Products */}
             {featuredProducts.length > 0 && (
@@ -95,55 +107,17 @@ const Index = () => {
                 <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
                   Categorias
                 </h2>
-                <CategoryGrid categories={categories} onSelect={setSelectedCategory} />
-              </section>
-            )}
-
-            {/* All Products */}
-            {products.length > 0 && (
-              <section className="py-8 border-t border-border">
-                <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
-                  Todos os Produtos
-                </h2>
-                {loading ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="bg-card rounded-xl animate-pulse h-64" />
-                    ))}
-                  </div>
-                ) : (
-                  <ProductGrid products={products} onProductClick={setSelectedProduct} />
-                )}
+                <CategoryGrid
+                  categories={categories}
+                  onSelect={(id) => navigate(`/categoria/${id}`)}
+                />
               </section>
             )}
           </>
         )}
-
-        {/* === FILTERED VIEW === */}
-        {!showHome && (
-          <section className="py-8">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-serif text-foreground font-semibold">
-                {selectedCategory ? getCategoryName(selectedCategory) : `Resultados para "${searchQuery}"`}
-              </h2>
-              <button
-                onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
-                className="text-sm text-primary hover:underline"
-              >
-                ← Voltar
-              </button>
-            </div>
-
-            {filteredProducts.length === 0 ? (
-              <p className="text-center text-muted-foreground py-12">Nenhum produto encontrado.</p>
-            ) : (
-              <ProductGrid products={filteredProducts} onProductClick={setSelectedProduct} />
-            )}
-          </section>
-        )}
       </main>
 
-      <Footer categories={categories} onSelectCategory={setSelectedCategory} />
+      <Footer categories={categories} onSelectCategory={(id) => id && navigate(`/categoria/${id}`)} />
       <WhatsAppButton />
 
       <ProductModal
