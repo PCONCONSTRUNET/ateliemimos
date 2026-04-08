@@ -22,8 +22,8 @@ export const ProductGrid = ({ products, onProductClick }: ProductGridProps) => {
       {products.map((product, index) => (
         <div
           key={product.id}
-          className="animate-fade-in"
-          style={{ animationDelay: `${index * 0.05}s` }}
+          className="opacity-0 animate-fade-in"
+          style={{ animationDelay: `${index * 0.07}s` }}
         >
           <ProductCard product={product} onClick={() => onProductClick(product)} />
         </div>

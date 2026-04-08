@@ -24,7 +24,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   return (
     <button
       onClick={onClick}
-      className="group w-full text-left bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
+      className="group w-full text-left bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
         {imageUrl ? (

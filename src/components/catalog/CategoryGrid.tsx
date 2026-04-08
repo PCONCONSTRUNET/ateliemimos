@@ -16,14 +16,15 @@ export const CategoryGrid = ({ categories, onSelect }: CategoryGridProps) => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {categories.map((cat) => {
+      {categories.map((cat, index) => {
         const imageUrl = cat.imagem || categoryImages[cat.nome] || null;
 
         return (
           <button
             key={cat.id}
             onClick={() => onSelect(cat.id)}
-            className="group relative aspect-[4/3] rounded-xl overflow-hidden border border-border bg-card hover:shadow-lg transition-all duration-300"
+            className="group relative aspect-[4/3] rounded-xl overflow-hidden border border-border bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 opacity-0 animate-fade-in-scale"
+            style={{ animationDelay: `${index * 0.08}s` }}
           >
             {imageUrl ? (
               <img
