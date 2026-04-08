@@ -311,6 +311,7 @@ const Admin = () => {
                 {categories.map((c) => (<SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>))}
               </SelectContent>
             </Select>
+            <Input placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Imagem</label>
               <Input type="file" accept="image/*" onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })} />
