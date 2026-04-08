@@ -55,6 +55,8 @@ const Admin = () => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropperSrc, setCropperSrc] = useState("");
   const [cropperTarget, setCropperTarget] = useState<"product" | "category">("product");
+  const [prodPreview, setProdPreview] = useState<string | null>(null);
+  const [catPreview, setCatPreview] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleFileSelect = (file: File, target: "product" | "category") => {
@@ -68,10 +70,13 @@ const Admin = () => {
   };
 
   const handleCropComplete = (croppedFile: File) => {
+    const url = URL.createObjectURL(croppedFile);
     if (cropperTarget === "product") {
       setProdForm((prev) => ({ ...prev, imagem: croppedFile }));
+      setProdPreview(url);
     } else {
       setCatForm((prev) => ({ ...prev, imagem: croppedFile }));
+      setCatPreview(url);
     }
     setCropperOpen(false);
     setCropperSrc("");
