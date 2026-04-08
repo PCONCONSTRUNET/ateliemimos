@@ -40,18 +40,26 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
           </div>
         )}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.destaque && (
+          {!product.disponivel && (
+            <Badge className="bg-foreground/80 text-background text-[10px] px-2 py-0.5 rounded-full">
+              Esgotado
+            </Badge>
+          )}
+          {product.destaque && product.disponivel && (
             <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full">
               ✨ Destaque
             </Badge>
           )}
         </div>
+        {!product.disponivel && (
+          <div className="absolute inset-0 bg-background/40" />
+        )}
       </div>
       <div className="p-3 space-y-1">
         <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
           {product.nome}
         </h3>
-        <p className="text-primary font-semibold text-sm">
+        <p className={`font-semibold text-sm ${product.disponivel ? "text-primary" : "text-muted-foreground line-through"}`}>
           {formatPrice(product.preco)}
         </p>
       </div>
