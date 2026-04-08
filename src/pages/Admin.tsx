@@ -216,7 +216,7 @@ const Admin = () => {
             </div>
             <div className="grid gap-3">
               {products.map((p) => (
-                <Card key={p.id}>
+                <Card key={p.id} className="rounded-2xl">
                   <CardContent className="flex items-center gap-4 p-4">
                     {p.imagem ? (
                       <img src={p.imagem} alt={p.nome} className="w-16 h-16 rounded-md object-cover" />
@@ -255,7 +255,7 @@ const Admin = () => {
             </div>
             <div className="grid gap-3">
               {categories.map((c) => (
-                <Card key={c.id}>
+                <Card key={c.id} className="rounded-2xl">
                   <CardContent className="flex items-center gap-4 p-4">
                     {c.imagem ? (
                       <img src={c.imagem} alt={c.nome} className="w-12 h-12 rounded-md object-cover" />
