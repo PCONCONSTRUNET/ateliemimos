@@ -11,6 +11,13 @@ import { Footer } from "@/components/catalog/Footer";
 import { useNavigate } from "react-router-dom";
 import { SlidersHorizontal, X } from "lucide-react";
 
+interface ProductImage {
+  id: string;
+  product_id: string;
+  url: string;
+  position: number;
+}
+
 interface Category {
   id: string;
   nome: string;
@@ -38,6 +45,9 @@ const Index = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [productImages, setProductImages] = useState<Record<string, string[]>>({});
+  const navigate = useNavigate();
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,9 +55,10 @@ const Index = () => {
   }, []);
 
   const fetchData = async () => {
-    const [catRes, prodRes] = await Promise.all([
+    const [catRes, prodRes, imgRes] = await Promise.all([
       supabase.from("categories").select("*").order("nome"),
       supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("product_images").select("*").order("position"),
     ]);
     if (catRes.data) setCategories(catRes.data);
     if (prodRes.data) {
@@ -56,6 +67,14 @@ const Index = () => {
       if (prices.length > 0) {
         setPriceRange([Math.min(...prices), Math.max(...prices)]);
       }
+    }
+    if (imgRes.data) {
+      const map: Record<string, string[]> = {};
+      imgRes.data.forEach((img: ProductImage) => {
+        if (!map[img.product_id]) map[img.product_id] = [];
+        map[img.product_id].push(img.url);
+      });
+      setProductImages(map);
     }
     setLoading(false);
   };
