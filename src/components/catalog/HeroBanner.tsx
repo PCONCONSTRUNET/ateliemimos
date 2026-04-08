@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import logoPrimary from "@/assets/logo-primary.png";
 
 const WHATSAPP_NUMBER = "5500000000000";
 
