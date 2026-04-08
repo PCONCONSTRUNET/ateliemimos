@@ -34,6 +34,7 @@ const CategoryPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [productImages, setProductImages] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     fetchData();
@@ -47,7 +48,26 @@ const CategoryPage = () => {
     ]);
     if (catRes.data) setCategory(catRes.data);
     if (catAllRes.data) setCategories(catAllRes.data);
-    if (prodRes.data) setProducts(prodRes.data);
+    if (prodRes.data) {
+      setProducts(prodRes.data);
+      // Fetch images for these products
+      const prodIds = prodRes.data.map((p: Product) => p.id);
+      if (prodIds.length > 0) {
+        const { data: imgData } = await supabase
+          .from("product_images")
+          .select("*")
+          .in("product_id", prodIds)
+          .order("position");
+        if (imgData) {
+          const map: Record<string, string[]> = {};
+          imgData.forEach((img: any) => {
+            if (!map[img.product_id]) map[img.product_id] = [];
+            map[img.product_id].push(img.url);
+          });
+          setProductImages(map);
+        }
+      }
+    }
     setLoading(false);
   };
 
@@ -97,6 +117,7 @@ const CategoryPage = () => {
         product={selectedProduct}
         categoryName={getCategoryName(selectedProduct?.categoria_id ?? null)}
         onClose={() => setSelectedProduct(null)}
+        extraImages={selectedProduct ? (productImages[selectedProduct.id] || []) : []}
       />
     </div>
   );

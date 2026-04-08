@@ -314,6 +314,7 @@ const Index = () => {
         product={selectedProduct}
         categoryName={getCategoryName(selectedProduct?.categoria_id ?? null)}
         onClose={() => setSelectedProduct(null)}
+        extraImages={selectedProduct ? (productImages[selectedProduct.id] || []) : []}
       />
     </div>
   );
