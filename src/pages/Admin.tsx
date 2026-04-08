@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
+import { ImageCropper } from "@/components/catalog/ImageCropper";
 
 interface Category {
   id: string;
@@ -51,7 +52,30 @@ const Admin = () => {
     imagem: null as File | null,
     tags: "",
   });
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropperSrc, setCropperSrc] = useState("");
+  const [cropperTarget, setCropperTarget] = useState<"product" | "category">("product");
   const navigate = useNavigate();
+
+  const handleFileSelect = (file: File, target: "product" | "category") => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropperSrc(reader.result as string);
+      setCropperTarget(target);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    if (cropperTarget === "product") {
+      setProdForm((prev) => ({ ...prev, imagem: croppedFile }));
+    } else {
+      setCatForm((prev) => ({ ...prev, imagem: croppedFile }));
+    }
+    setCropperOpen(false);
+    setCropperSrc("");
+  };
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
@@ -287,7 +311,8 @@ const Admin = () => {
             <Input className="rounded-xl h-11" placeholder="Nome da categoria" value={catForm.nome} onChange={(e) => setCatForm({ ...catForm, nome: e.target.value })} />
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
-              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imagem: e.target.files?.[0] || null })} />
+              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "category"); }} />
+              {catForm.imagem && <p className="text-xs text-primary mt-1">✅ Imagem recortada</p>}
             </div>
             <Button onClick={saveCat} className="w-full rounded-xl h-11 text-sm font-semibold">Salvar</Button>
           </div>
@@ -314,7 +339,8 @@ const Admin = () => {
             <Input className="rounded-xl h-11" placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
-              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })} />
+              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "product"); }} />
+              {prodForm.imagem && <p className="text-xs text-primary mt-1">✅ Imagem recortada</p>}
             </div>
             <div className="flex items-center gap-6 py-1">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -330,6 +356,15 @@ const Admin = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Image Cropper */}
+      <ImageCropper
+        open={cropperOpen}
+        imageSrc={cropperSrc}
+        aspect={cropperTarget === "product" ? 1 : 16 / 9}
+        onCropComplete={handleCropComplete}
+        onCancel={() => { setCropperOpen(false); setCropperSrc(""); }}
+      />
     </div>
   );
 };
