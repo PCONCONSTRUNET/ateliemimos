@@ -34,9 +34,13 @@ export const ProductModal = ({ product, categoryName, onClose }: ProductModalPro
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Olá! Tenho interesse no produto: *${product.nome}* - ${formatPrice(product.preco)}`
-    );
+    let msg = `Olá! Gostaria de fazer um pedido:\n\n`;
+    msg += `📦 *Produto:* ${product.nome}\n`;
+    msg += `💰 *Valor:* ${formatPrice(product.preco)}\n`;
+    if (categoryName) msg += `📂 *Categoria:* ${categoryName}\n`;
+    if (product.descricao) msg += `📝 *Descrição:* ${product.descricao}\n`;
+    msg += `\nPoderia me informar sobre disponibilidade e formas de pagamento?`;
+    const message = encodeURIComponent(msg);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
   };
 
