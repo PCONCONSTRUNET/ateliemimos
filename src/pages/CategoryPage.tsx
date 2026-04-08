@@ -22,6 +22,7 @@ interface Product {
   categoria_id: string | null;
   destaque: boolean;
   disponivel: boolean;
+  tags?: string[];
 }
 
 const CategoryPage = () => {
