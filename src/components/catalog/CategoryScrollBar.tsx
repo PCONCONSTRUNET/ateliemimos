@@ -66,7 +66,8 @@ export const CategoryScrollBar = ({ categories, onSelect }: CategoryScrollBarPro
             <button
               key={cat.id}
               onClick={() => onSelect(cat.id)}
-              className="flex-shrink-0 snap-start flex flex-col items-center gap-1.5 group"
+              className="flex-shrink-0 snap-start flex flex-col items-center gap-1.5 group opacity-0 animate-fade-in"
+              style={{ animationDelay: `${index * 0.06}s` }}
             >
               <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors shadow-sm">
                 {img ? (
