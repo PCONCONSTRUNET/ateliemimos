@@ -202,9 +202,9 @@ const Admin = () => {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="products">
-          <TabsList className="mb-6">
-            <TabsTrigger value="products">Produtos ({products.length})</TabsTrigger>
-            <TabsTrigger value="categories">Categorias ({categories.length})</TabsTrigger>
+          <TabsList className="mb-6 bg-primary/10 rounded-full p-1 h-auto">
+            <TabsTrigger value="products" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Produtos ({products.length})</TabsTrigger>
+            <TabsTrigger value="categories" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Categorias ({categories.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
