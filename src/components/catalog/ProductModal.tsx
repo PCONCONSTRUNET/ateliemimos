@@ -5,6 +5,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { ProductImageCarousel } from "./ProductImageCarousel";
 import { productImages } from "@/lib/sample-images";
 
 interface Product {
@@ -23,11 +24,12 @@ interface ProductModalProps {
   product: Product | null;
   categoryName: string;
   onClose: () => void;
+  extraImages?: string[];
 }
 
 const WHATSAPP_NUMBER = "5548996222795";
 
-export const ProductModal = ({ product, categoryName, onClose }: ProductModalProps) => {
+export const ProductModal = ({ product, categoryName, onClose, extraImages = [] }: ProductModalProps) => {
   if (!product) return null;
 
   const formatPrice = (price: number) =>
@@ -44,20 +46,24 @@ export const ProductModal = ({ product, categoryName, onClose }: ProductModalPro
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
   };
 
-  const img = product.imagem || productImages[product.nome] || null;
+  // Build image list: main image + extra images from product_images table
+  const allImages: string[] = [];
+  const mainImg = product.imagem || productImages[product.nome] || null;
+  if (mainImg) allImages.push(mainImg);
+  extraImages.forEach((url) => {
+    if (!allImages.includes(url)) allImages.push(url);
+  });
 
   return (
     <Dialog open={!!product} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-md w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto p-0 bg-card rounded-2xl gap-0">
-        {/* Image - large */}
-        {img && (
-          <div className="w-full overflow-hidden bg-muted">
-            <img
-              src={img}
-              alt={product.nome}
-              className="w-full h-auto max-h-[60vh] object-cover"
-            />
-          </div>
+        {/* Image carousel */}
+        {allImages.length > 0 && (
+          <ProductImageCarousel
+            images={allImages}
+            alt={product.nome}
+            className="w-full aspect-square"
+          />
         )}
 
         <div className="p-5 space-y-3">
