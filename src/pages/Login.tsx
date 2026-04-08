@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,9 +18,12 @@ const Login = () => {
     setLoading(true);
     setError("");
 
+    // Convert username to email format for Supabase Auth
+    const email = `${username.trim().toLowerCase()}@ateliemimos.app`;
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setError("Email ou senha inválidos.");
+      setError("Usuário ou senha inválidos.");
     } else {
       navigate("/admin");
     }
@@ -37,10 +40,10 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Usuário"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
             <Input
