@@ -43,7 +43,7 @@ export const ProductModal = ({ product, categoryName, onClose }: ProductModalPro
 
   return (
     <Dialog open={!!product} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-md p-0 overflow-hidden bg-card rounded-2xl gap-0">
+      <DialogContent className="max-w-md w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto p-0 bg-card rounded-2xl gap-0">
         {/* Image - large */}
         {img && (
           <div className="w-full overflow-hidden bg-muted">
