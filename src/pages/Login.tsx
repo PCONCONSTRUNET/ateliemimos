@@ -31,13 +31,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <img src={logo} alt="Logo" className="h-16 mx-auto mb-2" />
-          <CardTitle className="font-serif text-xl">Painel Administrativo</CardTitle>
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center px-4">
+      <Card className="w-full max-w-sm rounded-2xl shadow-xl border-border/50">
+        <CardHeader className="text-center pt-8 pb-2">
+          <img src={logo} alt="Logo" className="h-20 mx-auto mb-3" />
+          <CardTitle className="font-serif text-xl text-foreground">Painel Administrativo</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">Acesse sua conta para gerenciar o catálogo</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 pb-8">
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="text"
@@ -45,6 +46,7 @@ const Login = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              className="rounded-xl h-12"
             />
             <Input
               type="password"
@@ -52,9 +54,10 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="rounded-xl h-12"
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
+            {error && <p className="text-sm text-destructive text-center">{error}</p>}
+            <Button type="submit" className="w-full rounded-full h-12 text-sm font-semibold" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
