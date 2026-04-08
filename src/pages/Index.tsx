@@ -72,9 +72,7 @@ const Index = () => {
       />
 
       {/* Hero Banner */}
-      {showHero && (
-        <HeroBanner categories={categories} onSelectCategory={setSelectedCategory} />
-      )}
+      {showHero && <HeroBanner />}
 
       <main className="container mx-auto px-4 pb-24">
         {/* Horizontal category bar */}
