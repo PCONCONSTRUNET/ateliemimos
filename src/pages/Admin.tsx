@@ -356,6 +356,15 @@ const Admin = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Image Cropper */}
+      <ImageCropper
+        open={cropperOpen}
+        imageSrc={cropperSrc}
+        aspect={cropperTarget === "product" ? 1 : 16 / 9}
+        onCropComplete={handleCropComplete}
+        onCancel={() => { setCropperOpen(false); setCropperSrc(""); }}
+      />
     </div>
   );
 };
