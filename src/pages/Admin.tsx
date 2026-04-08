@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Plus, Pencil, Trash2 } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, X, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { ImageCropper } from "@/components/catalog/ImageCropper";
@@ -30,6 +30,13 @@ interface Product {
   destaque: boolean;
   disponivel: boolean;
   tags?: string[];
+}
+
+interface ProductImage {
+  id: string;
+  product_id: string;
+  url: string;
+  position: number;
 }
 
 const Admin = () => {
@@ -54,12 +61,15 @@ const Admin = () => {
   });
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropperSrc, setCropperSrc] = useState("");
-  const [cropperTarget, setCropperTarget] = useState<"product" | "category">("product");
+  const [cropperTarget, setCropperTarget] = useState<"product" | "category" | "extra">("product");
   const [prodPreview, setProdPreview] = useState<string | null>(null);
   const [catPreview, setCatPreview] = useState<string | null>(null);
+  // Multi-image states
+  const [extraImages, setExtraImages] = useState<ProductImage[]>([]);
+  const [pendingExtraFiles, setPendingExtraFiles] = useState<{ file: File; preview: string }[]>([]);
   const navigate = useNavigate();
 
-  const handleFileSelect = (file: File, target: "product" | "category") => {
+  const handleFileSelect = (file: File, target: "product" | "category" | "extra") => {
     const reader = new FileReader();
     reader.onload = () => {
       setCropperSrc(reader.result as string);
@@ -74,9 +84,11 @@ const Admin = () => {
     if (cropperTarget === "product") {
       setProdForm((prev) => ({ ...prev, imagem: croppedFile }));
       setProdPreview(url);
-    } else {
+    } else if (cropperTarget === "category") {
       setCatForm((prev) => ({ ...prev, imagem: croppedFile }));
       setCatPreview(url);
+    } else if (cropperTarget === "extra") {
+      setPendingExtraFiles((prev) => [...prev, { file: croppedFile, preview: url }]);
     }
     setCropperOpen(false);
     setCropperSrc("");
@@ -109,7 +121,7 @@ const Admin = () => {
 
   const uploadImage = async (file: File, folder: string): Promise<string | null> => {
     const ext = file.name.split(".").pop();
-    const fileName = `${folder}/${Date.now()}.${ext}`;
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from("images").upload(fileName, file);
     if (error) {
       toast.error("Erro no upload: " + error.message);
@@ -153,7 +165,17 @@ const Admin = () => {
     toast.success("Categoria excluída!");
   };
 
-  const openProdModal = (prod?: Product) => {
+  const fetchProductImages = async (productId: string) => {
+    const { data } = await supabase
+      .from("product_images")
+      .select("*")
+      .eq("product_id", productId)
+      .order("position");
+    return (data || []) as ProductImage[];
+  };
+
+  const openProdModal = async (prod?: Product) => {
+    setPendingExtraFiles([]);
     if (prod) {
       setEditingProd(prod);
       setProdForm({
@@ -166,11 +188,15 @@ const Admin = () => {
         imagem: null,
         tags: (prod.tags || []).join(", "),
       });
+      setProdPreview(prod.imagem || null);
+      const imgs = await fetchProductImages(prod.id);
+      setExtraImages(imgs);
     } else {
       setEditingProd(null);
       setProdForm({ nome: "", preco: "", descricao: "", categoria_id: "", destaque: false, disponivel: true, imagem: null, tags: "" });
+      setProdPreview(null);
+      setExtraImages([]);
     }
-    setProdPreview(prod?.imagem || null);
     setProdModal(true);
   };
 
@@ -193,14 +219,43 @@ const Admin = () => {
       imagem: imageUrl,
       tags: tagsArray,
     };
+
+    let productId = editingProd?.id;
     if (editingProd) {
       await supabase.from("products").update(data).eq("id", editingProd.id);
     } else {
-      await supabase.from("products").insert(data);
+      const { data: inserted } = await supabase.from("products").insert(data).select("id").single();
+      if (inserted) productId = inserted.id;
     }
+
+    // Upload pending extra images
+    if (productId && pendingExtraFiles.length > 0) {
+      const startPos = extraImages.length;
+      for (let i = 0; i < pendingExtraFiles.length; i++) {
+        const url = await uploadImage(pendingExtraFiles[i].file, "products");
+        if (url) {
+          await supabase.from("product_images").insert({
+            product_id: productId,
+            url,
+            position: startPos + i,
+          });
+        }
+      }
+    }
+
     setProdModal(false);
     fetchAll();
     toast.success(editingProd ? "Produto atualizado!" : "Produto criado!");
+  };
+
+  const deleteExtraImage = async (img: ProductImage) => {
+    await supabase.from("product_images").delete().eq("id", img.id);
+    setExtraImages((prev) => prev.filter((i) => i.id !== img.id));
+    toast.success("Imagem removida!");
+  };
+
+  const removePendingExtra = (index: number) => {
+    setPendingExtraFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const deleteProd = async (id: string) => {
@@ -346,13 +401,58 @@ const Admin = () => {
               </SelectContent>
             </Select>
             <Input className="rounded-xl h-11" placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
+
+            {/* Main image */}
             <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem principal</label>
               {prodPreview && (
                 <img src={prodPreview} alt="Preview" className="w-full h-40 object-cover rounded-xl mb-2 border border-border" />
               )}
               <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "product"); }} />
             </div>
+
+            {/* Extra images */}
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagens adicionais</label>
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {/* Existing saved images */}
+                {extraImages.map((img) => (
+                  <div key={img.id} className="relative group">
+                    <img src={img.url} alt="Extra" className="w-full aspect-square object-cover rounded-xl border border-border" />
+                    <button
+                      onClick={() => deleteExtraImage(img)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                {/* Pending (not yet saved) images */}
+                {pendingExtraFiles.map((item, i) => (
+                  <div key={`pending-${i}`} className="relative group">
+                    <img src={item.preview} alt="Nova" className="w-full aspect-square object-cover rounded-xl border-2 border-dashed border-primary/40" />
+                    <button
+                      onClick={() => removePendingExtra(i)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                {/* Add button */}
+                <label className="w-full aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                  <ImagePlus className="h-5 w-5 text-muted-foreground mb-1" />
+                  <span className="text-[10px] text-muted-foreground">Adicionar</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "extra"); }}
+                  />
+                </label>
+              </div>
+            </div>
+
             <div className="flex items-center gap-6 py-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox checked={prodForm.destaque} onCheckedChange={(c) => setProdForm({ ...prodForm, destaque: !!c })} />
@@ -372,7 +472,7 @@ const Admin = () => {
       <ImageCropper
         open={cropperOpen}
         imageSrc={cropperSrc}
-        aspect={cropperTarget === "product" ? 1 : 16 / 9}
+        aspect={cropperTarget === "category" ? 16 / 9 : 1}
         onCropComplete={handleCropComplete}
         onCancel={() => { setCropperOpen(false); setCropperSrc(""); }}
       />
