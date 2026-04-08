@@ -18,19 +18,6 @@ export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
           Especialista em bordados. 👜 Bolsas e sintéticos personalizados.
         </p>
 
-        {categories.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => onSelectCategory?.(cat.id)}
-                className="text-xs text-accent hover:text-primary transition-colors font-medium"
-              >
-                {cat.nome}
-              </button>
-            ))}
-          </div>
-        )}
 
         <div className="w-full h-px bg-border mt-4" />
 
