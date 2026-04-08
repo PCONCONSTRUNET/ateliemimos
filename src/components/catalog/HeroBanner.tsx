@@ -1,14 +1,10 @@
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface HeroBannerProps {
-  categories: { id: string; nome: string; imagem: string | null }[];
-  onSelectCategory: (id: string | null) => void;
-}
+import logo from "@/assets/logo.png";
 
 const WHATSAPP_NUMBER = "5500000000000";
 
-export const HeroBanner = ({ categories, onSelectCategory }: HeroBannerProps) => {
+export const HeroBanner = () => {
   const handleWhatsApp = () => {
     const message = encodeURIComponent("Olá! Gostaria de saber mais sobre os produtos do ateliê.");
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
@@ -22,10 +18,8 @@ export const HeroBanner = ({ categories, onSelectCategory }: HeroBannerProps) =>
           Personalizados
         </span>
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-serif text-foreground leading-tight">
-          Ateliê Mimos<br />da Preta
-        </h1>
+        {/* Logo */}
+        <img src={logo} alt="Ateliê Mimos da Preta" className="h-28 mx-auto object-contain" />
 
         {/* Description */}
         <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
