@@ -311,7 +311,8 @@ const Admin = () => {
             <Input className="rounded-xl h-11" placeholder="Nome da categoria" value={catForm.nome} onChange={(e) => setCatForm({ ...catForm, nome: e.target.value })} />
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
-              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imagem: e.target.files?.[0] || null })} />
+              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "category"); }} />
+              {catForm.imagem && <p className="text-xs text-primary mt-1">✅ Imagem recortada</p>}
             </div>
             <Button onClick={saveCat} className="w-full rounded-xl h-11 text-sm font-semibold">Salvar</Button>
           </div>
@@ -338,7 +339,8 @@ const Admin = () => {
             <Input className="rounded-xl h-11" placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
-              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })} />
+              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "product"); }} />
+              {prodForm.imagem && <p className="text-xs text-primary mt-1">✅ Imagem recortada</p>}
             </div>
             <div className="flex items-center gap-6 py-1">
               <label className="flex items-center gap-2 cursor-pointer">
