@@ -170,6 +170,7 @@ const Admin = () => {
       setEditingProd(null);
       setProdForm({ nome: "", preco: "", descricao: "", categoria_id: "", destaque: false, disponivel: true, imagem: null, tags: "" });
     }
+    setProdPreview(prod?.imagem || null);
     setProdModal(true);
   };
 
