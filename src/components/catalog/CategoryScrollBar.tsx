@@ -60,7 +60,7 @@ export const CategoryScrollBar = ({ categories, onSelect }: CategoryScrollBarPro
         className="flex gap-3 overflow-x-auto scrollbar-hide px-1 py-2 snap-x snap-mandatory"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {categories.map((cat) => {
+        {categories.map((cat, index) => {
           const img = cat.imagem || categoryImages[cat.nome] || null;
           return (
             <button
