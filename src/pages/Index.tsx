@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/catalog/Header";
 import { HeroBanner } from "@/components/catalog/HeroBanner";
-import { CategoryBar } from "@/components/catalog/CategoryBar";
+import { CategoryGrid } from "@/components/catalog/CategoryGrid";
 import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { ProductModal } from "@/components/catalog/ProductModal";
 import { WhatsAppButton } from "@/components/catalog/WhatsAppButton";
@@ -47,20 +47,20 @@ const Index = () => {
     setLoading(false);
   };
 
+  const featuredProducts = products.filter((p) => p.destaque);
+
   const filteredProducts = products.filter((p) => {
     const matchesCategory = !selectedCategory || p.categoria_id === selectedCategory;
     const matchesSearch = !searchQuery || p.nome.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const featuredProducts = products.filter((p) => p.destaque);
-
   const getCategoryName = (id: string | null) => {
     if (!id) return "";
     return categories.find((c) => c.id === id)?.nome || "";
   };
 
-  const showHero = !selectedCategory && !searchQuery;
+  const showHome = !selectedCategory && !searchQuery;
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,75 +71,79 @@ const Index = () => {
         onSelectCategory={setSelectedCategory}
       />
 
-      {/* Hero Banner */}
-      {showHero && <HeroBanner />}
+      {/* Hero */}
+      {showHome && <HeroBanner />}
 
       <main className="container mx-auto px-4 pb-24">
-        {/* Horizontal category bar */}
-        <CategoryBar
-          categories={categories}
-          selected={selectedCategory}
-          onSelect={setSelectedCategory}
-        />
 
-        {/* Featured Products */}
-        {showHero && featuredProducts.length > 0 && (
-          <section className="mb-10">
-            <h2 className="text-xl font-serif text-foreground mb-5 font-semibold">
-              Produtos em destaque
-            </h2>
-            <ProductGrid
-              products={featuredProducts}
-              onProductClick={setSelectedProduct}
-            />
-          </section>
+        {/* === HOME VIEW === */}
+        {showHome && (
+          <>
+            {/* Featured Products */}
+            {featuredProducts.length > 0 && (
+              <section className="py-8">
+                <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
+                  ✨ Destaques
+                </h2>
+                <ProductGrid products={featuredProducts} onProductClick={setSelectedProduct} />
+              </section>
+            )}
+
+            {/* Categories with photos */}
+            {categories.length > 0 && (
+              <section className="py-8 border-t border-border">
+                <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
+                  Categorias
+                </h2>
+                <CategoryGrid categories={categories} onSelect={setSelectedCategory} />
+              </section>
+            )}
+
+            {/* All Products */}
+            {products.length > 0 && (
+              <section className="py-8 border-t border-border">
+                <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
+                  Todos os Produtos
+                </h2>
+                {loading ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="bg-card rounded-xl animate-pulse h-64" />
+                    ))}
+                  </div>
+                ) : (
+                  <ProductGrid products={products} onProductClick={setSelectedProduct} />
+                )}
+              </section>
+            )}
+          </>
         )}
 
-        {/* Filtered / All Products */}
-        <section>
-          {(selectedCategory || searchQuery) && (
-            <div className="flex items-center justify-between mb-4">
+        {/* === FILTERED VIEW === */}
+        {!showHome && (
+          <section className="py-8">
+            <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-serif text-foreground font-semibold">
                 {selectedCategory ? getCategoryName(selectedCategory) : `Resultados para "${searchQuery}"`}
               </h2>
-              {selectedCategory && (
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Ver todos
-                </button>
-              )}
+              <button
+                onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
+                className="text-sm text-primary hover:underline"
+              >
+                ← Voltar
+              </button>
             </div>
-          )}
 
-          {showHero && products.length > 0 && (
-            <h2 className="text-xl font-serif text-foreground mb-5 font-semibold">
-              Todos os Produtos
-            </h2>
-          )}
-
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-card rounded-xl animate-pulse h-64" />
-              ))}
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">
-              Nenhum produto encontrado.
-            </p>
-          ) : (
-            <ProductGrid
-              products={filteredProducts}
-              onProductClick={setSelectedProduct}
-            />
-          )}
-        </section>
+            {filteredProducts.length === 0 ? (
+              <p className="text-center text-muted-foreground py-12">Nenhum produto encontrado.</p>
+            ) : (
+              <ProductGrid products={filteredProducts} onProductClick={setSelectedProduct} />
+            )}
+          </section>
+        )}
       </main>
 
       <Footer categories={categories} onSelectCategory={setSelectedCategory} />
-
       <WhatsAppButton />
 
       <ProductModal
