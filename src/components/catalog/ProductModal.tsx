@@ -56,7 +56,7 @@ export const ProductModal = ({ product, categoryName, onClose }: ProductModalPro
           </div>
         )}
 
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-3">
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-lg font-semibold text-foreground text-left">
               {product.nome}
@@ -69,6 +69,27 @@ export const ProductModal = ({ product, categoryName, onClose }: ProductModalPro
           <p className="text-lg font-semibold text-primary">
             {formatPrice(product.preco)}
           </p>
+
+          {/* Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {product.tags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-[11px] bg-primary/10 text-accent px-2.5 py-1 rounded-full font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Description */}
+          {product.descricao && (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {product.descricao}
+            </p>
+          )}
 
           {/* WhatsApp button */}
           <button
