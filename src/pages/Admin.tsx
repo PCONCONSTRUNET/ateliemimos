@@ -127,6 +127,7 @@ const Admin = () => {
       setEditingCat(null);
       setCatForm({ nome: "", imagem: null });
     }
+    setCatPreview(cat?.imagem || null);
     setCatModal(true);
   };
 
