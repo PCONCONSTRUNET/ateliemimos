@@ -19,7 +19,7 @@ export const HeroBanner = () => {
         </span>
 
         {/* Logo */}
-        <img src={logo} alt="Ateliê Mimos da Preta" className="h-28 mx-auto object-contain" />
+        <img src={logoPrimary} alt="Ateliê Mimos da Preta" className="h-28 mx-auto object-contain" />
 
         {/* Description */}
         <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
