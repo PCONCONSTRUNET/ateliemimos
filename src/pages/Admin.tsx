@@ -57,6 +57,26 @@ const Admin = () => {
   const [cropperTarget, setCropperTarget] = useState<"product" | "category">("product");
   const navigate = useNavigate();
 
+  const handleFileSelect = (file: File, target: "product" | "category") => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropperSrc(reader.result as string);
+      setCropperTarget(target);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    if (cropperTarget === "product") {
+      setProdForm((prev) => ({ ...prev, imagem: croppedFile }));
+    } else {
+      setCatForm((prev) => ({ ...prev, imagem: croppedFile }));
+    }
+    setCropperOpen(false);
+    setCropperSrc("");
+  };
+
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
