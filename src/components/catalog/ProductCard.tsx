@@ -21,7 +21,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   return (
     <button
       onClick={onClick}
-      className="group w-full text-left bg-card rounded-lg overflow-hidden border border-border hover:shadow-md transition-all duration-300"
+      className="group w-full text-left bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
     >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
@@ -41,25 +41,16 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
         {/* Tags */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.destaque && (
-            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5">
+            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full">
               ✨ Destaque
             </Badge>
           )}
-          <Badge
-            className={`text-[10px] px-2 py-0.5 ${
-              product.disponivel
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-amber-100 text-amber-700"
-            }`}
-          >
-            {product.disponivel ? "Disponível" : "Sob encomenda"}
-          </Badge>
         </div>
       </div>
 
       {/* Info */}
-      <div className="p-3">
-        <h3 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
+      <div className="p-3 space-y-1">
+        <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
           {product.nome}
         </h3>
         <p className="text-primary font-semibold text-sm">

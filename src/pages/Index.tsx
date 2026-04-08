@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/catalog/Header";
+import { HeroBanner } from "@/components/catalog/HeroBanner";
 import { CategoryBar } from "@/components/catalog/CategoryBar";
 import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { ProductModal } from "@/components/catalog/ProductModal";
@@ -59,12 +60,24 @@ const Index = () => {
     return categories.find((c) => c.id === id)?.nome || "";
   };
 
+  const showHero = !selectedCategory && !searchQuery;
+
   return (
     <div className="min-h-screen bg-background">
-      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <Header
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        categories={categories}
+        onSelectCategory={setSelectedCategory}
+      />
+
+      {/* Hero Banner */}
+      {showHero && (
+        <HeroBanner categories={categories} onSelectCategory={setSelectedCategory} />
+      )}
 
       <main className="container mx-auto px-4 pb-24">
-        {/* Categories */}
+        {/* Horizontal category bar */}
         <CategoryBar
           categories={categories}
           selected={selectedCategory}
@@ -72,10 +85,10 @@ const Index = () => {
         />
 
         {/* Featured Products */}
-        {!selectedCategory && !searchQuery && featuredProducts.length > 0 && (
+        {showHero && featuredProducts.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-2xl font-serif text-foreground mb-6 text-center">
-              ✨ Destaques
+            <h2 className="text-xl font-serif text-foreground mb-5 font-semibold">
+              Produtos em destaque
             </h2>
             <ProductGrid
               products={featuredProducts}
@@ -84,11 +97,11 @@ const Index = () => {
           </section>
         )}
 
-        {/* All Products */}
+        {/* Filtered / All Products */}
         <section>
           {(selectedCategory || searchQuery) && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-serif text-foreground">
+              <h2 className="text-xl font-serif text-foreground font-semibold">
                 {selectedCategory ? getCategoryName(selectedCategory) : `Resultados para "${searchQuery}"`}
               </h2>
               {selectedCategory && (
@@ -102,8 +115,8 @@ const Index = () => {
             </div>
           )}
 
-          {!selectedCategory && !searchQuery && (
-            <h2 className="text-2xl font-serif text-foreground mb-6 text-center">
+          {showHero && products.length > 0 && (
+            <h2 className="text-xl font-serif text-foreground mb-5 font-semibold">
               Todos os Produtos
             </h2>
           )}
@@ -111,7 +124,7 @@ const Index = () => {
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-card rounded-lg animate-pulse h-64" />
+                <div key={i} className="bg-card rounded-xl animate-pulse h-64" />
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -127,7 +140,7 @@ const Index = () => {
         </section>
       </main>
 
-      <Footer />
+      <Footer categories={categories} onSelectCategory={setSelectedCategory} />
 
       <WhatsAppButton />
 
