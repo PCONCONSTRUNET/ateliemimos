@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import logoPrimary from "@/assets/logo-primary.png";
 
 const WHATSAPP_NUMBER = "5500000000000";
 
@@ -19,7 +19,7 @@ export const HeroBanner = () => {
         </span>
 
         {/* Logo */}
-        <img src={logo} alt="Ateliê Mimos da Preta" className="h-28 mx-auto object-contain" />
+        <img src={logoPrimary} alt="Ateliê Mimos da Preta" className="h-28 mx-auto object-contain" />
 
         {/* Description */}
         <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
