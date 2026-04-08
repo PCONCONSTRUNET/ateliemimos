@@ -194,7 +194,7 @@ const Admin = () => {
             <img src={logo} alt="Logo" className="h-10" />
             <h1 className="font-serif text-lg text-foreground">Painel Admin</h1>
           </div>
-          <Button variant="ghost" onClick={handleLogout} className="gap-2">
+          <Button variant="ghost" onClick={handleLogout} className="gap-2 rounded-full">
             <LogOut className="h-4 w-4" /> Sair
           </Button>
         </div>
@@ -210,13 +210,13 @@ const Admin = () => {
           <TabsContent value="products">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-serif">Produtos</h2>
-              <Button onClick={() => openProdModal()} className="gap-2">
+              <Button onClick={() => openProdModal()} className="gap-2 rounded-full">
                 <Plus className="h-4 w-4" /> Novo Produto
               </Button>
             </div>
             <div className="grid gap-3">
               {products.map((p) => (
-                <Card key={p.id}>
+                <Card key={p.id} className="rounded-2xl">
                   <CardContent className="flex items-center gap-4 p-4">
                     {p.imagem ? (
                       <img src={p.imagem} alt={p.nome} className="w-16 h-16 rounded-md object-cover" />
@@ -249,13 +249,13 @@ const Admin = () => {
           <TabsContent value="categories">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-serif">Categorias</h2>
-              <Button onClick={() => openCatModal()} className="gap-2">
+              <Button onClick={() => openCatModal()} className="gap-2 rounded-full">
                 <Plus className="h-4 w-4" /> Nova Categoria
               </Button>
             </div>
             <div className="grid gap-3">
               {categories.map((c) => (
-                <Card key={c.id}>
+                <Card key={c.id} className="rounded-2xl">
                   <CardContent className="flex items-center gap-4 p-4">
                     {c.imagem ? (
                       <img src={c.imagem} alt={c.nome} className="w-12 h-12 rounded-md object-cover" />
