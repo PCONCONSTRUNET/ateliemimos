@@ -7,12 +7,17 @@ interface FooterProps {
 
 export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
   return (
-    <footer className="bg-gradient-to-t from-primary/15 via-primary/5 to-background pt-10 pb-6">
-      <div className="container mx-auto px-4 text-center space-y-4">
+    <footer className="px-4 pb-6 pt-2">
+      <div className="rounded-2xl bg-gradient-to-t from-primary/15 via-primary/5 to-card border border-border p-8 text-center space-y-4">
+        {/* Divider line */}
+        <div className="w-16 h-[2px] bg-primary/30 mx-auto mb-2" />
+
         <img src={logo} alt="Ateliê Mimos da Preta" className="h-14 mx-auto opacity-80" />
+
         <p className="text-sm text-muted-foreground">
           Costura criativa, bordados e peças personalizadas.
         </p>
+
         {categories.length > 0 && (
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-2">
             {categories.map((cat) => (
@@ -26,7 +31,10 @@ export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
             ))}
           </div>
         )}
-        <p className="text-[11px] text-muted-foreground pt-4">
+
+        <div className="w-full h-px bg-border mt-4" />
+
+        <p className="text-[11px] text-muted-foreground">
           © {new Date().getFullYear()} Ateliê Mimos da Preta — Lisangela Moraes
         </p>
       </div>
