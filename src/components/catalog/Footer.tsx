@@ -7,10 +7,10 @@ interface FooterProps {
 
 export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
   return (
-    <footer className="w-full">
-      <div className="bg-gradient-to-t from-primary/15 via-primary/5 to-card border-t border-border p-8 text-center space-y-4">
+    <footer className="w-full px-4 pb-4">
+      <div className="bg-gradient-to-t from-primary/15 via-primary/5 to-card border border-border rounded-2xl p-8 text-center space-y-4">
         {/* Divider line */}
-        <div className="w-16 h-[2px] bg-primary/30 mx-auto mb-2" />
+        <div className="w-20 h-[3px] bg-primary/50 mx-auto mb-2 rounded-full" />
 
         <img src={logo} alt="Ateliê Mimos da Preta" className="h-14 mx-auto opacity-80" />
 
