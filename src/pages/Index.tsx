@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/catalog/Header";
 import { HeroBanner } from "@/components/catalog/HeroBanner";
+import { CategoryScrollBar } from "@/components/catalog/CategoryScrollBar";
 import { CategoryGrid } from "@/components/catalog/CategoryGrid";
 import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { ProductModal } from "@/components/catalog/ProductModal";
@@ -70,6 +71,16 @@ const Index = () => {
 
       {/* Hero */}
       {!searchQuery && <HeroBanner />}
+
+      {/* Category scroll bar */}
+      {!searchQuery && categories.length > 0 && (
+        <div className="container mx-auto px-4 pt-4">
+          <CategoryScrollBar
+            categories={categories}
+            onSelect={(id) => navigate(`/categoria/${id}`)}
+          />
+        </div>
+      )}
 
       <main className="container mx-auto px-4 pb-24">
         {/* Search results */}
