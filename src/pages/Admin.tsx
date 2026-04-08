@@ -49,6 +49,7 @@ const Admin = () => {
     destaque: false,
     disponivel: true,
     imagem: null as File | null,
+    tags: "",
   });
   const navigate = useNavigate();
 
@@ -133,10 +134,11 @@ const Admin = () => {
         destaque: prod.destaque,
         disponivel: prod.disponivel,
         imagem: null,
+        tags: (prod.tags || []).join(", "),
       });
     } else {
       setEditingProd(null);
-      setProdForm({ nome: "", preco: "", descricao: "", categoria_id: "", destaque: false, disponivel: true, imagem: null });
+      setProdForm({ nome: "", preco: "", descricao: "", categoria_id: "", destaque: false, disponivel: true, imagem: null, tags: "" });
     }
     setProdModal(true);
   };
@@ -146,6 +148,10 @@ const Admin = () => {
     if (prodForm.imagem) {
       imageUrl = await uploadImage(prodForm.imagem, "products");
     }
+    const tagsArray = prodForm.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     const data = {
       nome: prodForm.nome,
       preco: parseFloat(prodForm.preco) || 0,
@@ -154,6 +160,7 @@ const Admin = () => {
       destaque: prodForm.destaque,
       disponivel: prodForm.disponivel,
       imagem: imageUrl,
+      tags: tagsArray,
     };
     if (editingProd) {
       await supabase.from("products").update(data).eq("id", editingProd.id);
