@@ -52,6 +52,9 @@ const Admin = () => {
     imagem: null as File | null,
     tags: "",
   });
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropperSrc, setCropperSrc] = useState("");
+  const [cropperTarget, setCropperTarget] = useState<"product" | "category">("product");
   const navigate = useNavigate();
 
   useEffect(() => {
