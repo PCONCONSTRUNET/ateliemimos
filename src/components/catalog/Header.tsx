@@ -30,7 +30,7 @@ export const Header = ({ searchQuery, onSearchChange, categories, onSelectCatego
               placeholder="Buscar produtos..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 h-10 rounded-full bg-card border border-border shadow-sm text-sm"
+              className="pl-10 h-10 !rounded-full bg-card border border-border shadow-sm text-sm"
             />
           </div>
 
