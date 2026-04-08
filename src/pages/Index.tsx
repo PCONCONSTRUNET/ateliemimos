@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/catalog/Header";
 import { HeroBanner } from "@/components/catalog/HeroBanner";
@@ -9,6 +9,7 @@ import { ProductModal } from "@/components/catalog/ProductModal";
 import { WhatsAppButton } from "@/components/catalog/WhatsAppButton";
 import { Footer } from "@/components/catalog/Footer";
 import { useNavigate } from "react-router-dom";
+import { SlidersHorizontal, X } from "lucide-react";
 
 interface Category {
   id: string;
@@ -34,6 +35,9 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,20 +50,66 @@ const Index = () => {
       supabase.from("products").select("*").order("created_at", { ascending: false }),
     ]);
     if (catRes.data) setCategories(catRes.data);
-    if (prodRes.data) setProducts(prodRes.data);
+    if (prodRes.data) {
+      setProducts(prodRes.data);
+      const prices = prodRes.data.map((p) => p.preco);
+      if (prices.length > 0) {
+        setPriceRange([Math.min(...prices), Math.max(...prices)]);
+      }
+    }
     setLoading(false);
   };
 
-  const featuredProducts = products.filter((p) => p.destaque);
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 100;
+    return Math.max(...products.map((p) => p.preco));
+  }, [products]);
+
+  const minPrice = useMemo(() => {
+    if (products.length === 0) return 0;
+    return Math.min(...products.map((p) => p.preco));
+  }, [products]);
+
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    products.forEach((p) => p.tags?.forEach((t) => tags.add(t)));
+    return Array.from(tags).sort();
+  }, [products]);
+
+  const hasActiveFilters = priceRange[0] > minPrice || priceRange[1] < maxPrice || selectedTags.length > 0;
+
+  const filteredByFilters = useMemo(() => {
+    return products.filter((p) => {
+      if (p.preco < priceRange[0] || p.preco > priceRange[1]) return false;
+      if (selectedTags.length > 0 && (!p.tags || !selectedTags.some((t) => p.tags!.includes(t)))) return false;
+      return true;
+    });
+  }, [products, priceRange, selectedTags]);
+
+  const featuredProducts = filteredByFilters.filter((p) => p.destaque);
 
   const searchResults = searchQuery
-    ? products.filter((p) => p.nome.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? filteredByFilters.filter((p) => p.nome.toLowerCase().includes(searchQuery.toLowerCase()))
     : null;
 
   const getCategoryName = (id: string | null) => {
     if (!id) return "";
     return categories.find((c) => c.id === id)?.nome || "";
   };
+
+  const clearFilters = () => {
+    setPriceRange([minPrice, maxPrice]);
+    setSelectedTags([]);
+  };
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,7 +121,104 @@ const Index = () => {
       />
 
       {/* Hero */}
-      {!searchQuery && <HeroBanner />}
+      {!searchQuery && !hasActiveFilters && <HeroBanner />}
+
+      {/* Filter toggle */}
+      <div className="container mx-auto px-4 pt-3">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-colors ${
+              showFilters || hasActiveFilters
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-foreground border border-border"
+            }`}
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            Filtros
+            {hasActiveFilters && (
+              <span className="bg-primary-foreground text-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                !
+              </span>
+            )}
+          </button>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-3 w-3" />
+              Limpar
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="container mx-auto px-4 pt-3 pb-1 animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-4">
+            {/* Price range */}
+            <div>
+              <label className="text-xs font-semibold text-foreground mb-2 block">
+                💰 Faixa de preço
+              </label>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground min-w-[60px]">
+                  {formatPrice(priceRange[0])}
+                </span>
+                <div className="flex-1 flex flex-col gap-2">
+                  <input
+                    type="range"
+                    min={minPrice}
+                    max={maxPrice}
+                    step={1}
+                    value={priceRange[0]}
+                    onChange={(e) => setPriceRange([Math.min(Number(e.target.value), priceRange[1]), priceRange[1]])}
+                    className="w-full accent-[hsl(var(--primary))] h-1.5"
+                  />
+                  <input
+                    type="range"
+                    min={minPrice}
+                    max={maxPrice}
+                    step={1}
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], Math.max(Number(e.target.value), priceRange[0])])}
+                    className="w-full accent-[hsl(var(--primary))] h-1.5"
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground min-w-[60px] text-right">
+                  {formatPrice(priceRange[1])}
+                </span>
+              </div>
+            </div>
+
+            {/* Tags */}
+            {allTags.length > 0 && (
+              <div>
+                <label className="text-xs font-semibold text-foreground mb-2 block">
+                  🏷️ Tags
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {allTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
+                        selectedTags.includes(tag)
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground border border-border"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Category scroll bar */}
       {!searchQuery && categories.length > 0 && (
@@ -114,7 +261,7 @@ const Index = () => {
             )}
 
             {/* Categories with photos */}
-            {categories.length > 0 && (
+            {categories.length > 0 && !hasActiveFilters && (
               <section className="py-8 border-t border-border">
                 <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
                   Categorias
@@ -123,6 +270,20 @@ const Index = () => {
                   categories={categories}
                   onSelect={(id) => navigate(`/categoria/${id}`)}
                 />
+              </section>
+            )}
+
+            {/* All filtered products when filters active */}
+            {hasActiveFilters && (
+              <section className="py-8">
+                <h2 className="text-xl font-serif text-foreground font-semibold mb-5">
+                  Produtos ({filteredByFilters.length})
+                </h2>
+                {filteredByFilters.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-12">Nenhum produto encontrado com esses filtros.</p>
+                ) : (
+                  <ProductGrid products={filteredByFilters} onProductClick={setSelectedProduct} />
+                )}
               </section>
             )}
           </>
