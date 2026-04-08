@@ -15,7 +15,7 @@ export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
         <img src={logo} alt="Ateliê Mimos da Preta" className="h-14 mx-auto opacity-80" />
 
         <p className="text-sm text-muted-foreground">
-          Costura criativa, bordados e peças personalizadas.
+          Especialista em bordados. 👜 Bolsas e sintéticos personalizados.
         </p>
 
         {categories.length > 0 && (

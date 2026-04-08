@@ -15,7 +15,9 @@ export const HeroBanner = () => {
         <img src={logoPrimary} alt="Ateliê Mimos da Preta" className="h-36 mx-auto object-contain" />
 
         <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
-          Peças artesanais, bordados e costuras exclusivas feitas com carinho para você.
+          Especialista em bordados e costura criativa.
+          <br />
+          👜 Bolsas e sintéticos personalizados.
         </p>
 
         {/* WhatsApp Button */}
