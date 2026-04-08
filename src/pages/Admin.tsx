@@ -194,7 +194,7 @@ const Admin = () => {
             <img src={logo} alt="Logo" className="h-10" />
             <h1 className="font-serif text-lg text-foreground">Painel Admin</h1>
           </div>
-          <Button variant="ghost" onClick={handleLogout} className="gap-2">
+          <Button variant="ghost" onClick={handleLogout} className="gap-2 rounded-full">
             <LogOut className="h-4 w-4" /> Sair
           </Button>
         </div>
@@ -210,7 +210,7 @@ const Admin = () => {
           <TabsContent value="products">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-serif">Produtos</h2>
-              <Button onClick={() => openProdModal()} className="gap-2">
+              <Button onClick={() => openProdModal()} className="gap-2 rounded-full">
                 <Plus className="h-4 w-4" /> Novo Produto
               </Button>
             </div>
@@ -249,7 +249,7 @@ const Admin = () => {
           <TabsContent value="categories">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-serif">Categorias</h2>
-              <Button onClick={() => openCatModal()} className="gap-2">
+              <Button onClick={() => openCatModal()} className="gap-2 rounded-full">
                 <Plus className="h-4 w-4" /> Nova Categoria
               </Button>
             </div>
