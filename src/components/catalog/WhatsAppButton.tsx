@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "5500000000000"; // TODO: substituir pelo número real
+const WHATSAPP_NUMBER = "5548996222795";
 
 export const WhatsAppButton = () => {
   const handleClick = () => {
