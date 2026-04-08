@@ -278,45 +278,45 @@ const Admin = () => {
 
       {/* Category Modal */}
       <Dialog open={catModal} onOpenChange={setCatModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-serif">{editingCat ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 gap-0">
+          <DialogHeader className="p-5 pb-3">
+            <DialogTitle className="font-serif text-lg">{editingCat ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
             <DialogDescription className="sr-only">Formulário de categoria</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <Input placeholder="Nome da categoria" value={catForm.nome} onChange={(e) => setCatForm({ ...catForm, nome: e.target.value })} />
+          <div className="px-5 pb-5 space-y-4">
+            <Input className="rounded-xl h-11" placeholder="Nome da categoria" value={catForm.nome} onChange={(e) => setCatForm({ ...catForm, nome: e.target.value })} />
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Imagem</label>
-              <Input type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imagem: e.target.files?.[0] || null })} />
+              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
+              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => setCatForm({ ...catForm, imagem: e.target.files?.[0] || null })} />
             </div>
-            <Button onClick={saveCat} className="w-full">Salvar</Button>
+            <Button onClick={saveCat} className="w-full rounded-xl h-11 text-sm font-semibold">Salvar</Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Product Modal */}
       <Dialog open={prodModal} onOpenChange={setProdModal}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif">{editingProd ? "Editar Produto" : "Novo Produto"}</DialogTitle>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md max-h-[85vh] overflow-y-auto rounded-2xl p-0 gap-0">
+          <DialogHeader className="p-5 pb-3">
+            <DialogTitle className="font-serif text-lg">{editingProd ? "Editar Produto" : "Novo Produto"}</DialogTitle>
             <DialogDescription className="sr-only">Formulário de produto</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <Input placeholder="Nome do produto" value={prodForm.nome} onChange={(e) => setProdForm({ ...prodForm, nome: e.target.value })} />
-            <Input placeholder="Preço (ex: 89.90)" type="number" step="0.01" value={prodForm.preco} onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })} />
-            <Textarea placeholder="Descrição do produto" value={prodForm.descricao} onChange={(e) => setProdForm({ ...prodForm, descricao: e.target.value })} />
+          <div className="px-5 pb-5 space-y-3.5">
+            <Input className="rounded-xl h-11" placeholder="Nome do produto" value={prodForm.nome} onChange={(e) => setProdForm({ ...prodForm, nome: e.target.value })} />
+            <Input className="rounded-xl h-11" placeholder="Preço (ex: 89.90)" type="number" step="0.01" value={prodForm.preco} onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })} />
+            <Textarea className="rounded-xl min-h-[80px]" placeholder="Descrição do produto" value={prodForm.descricao} onChange={(e) => setProdForm({ ...prodForm, descricao: e.target.value })} />
             <Select value={prodForm.categoria_id} onValueChange={(v) => setProdForm({ ...prodForm, categoria_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
+              <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (<SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>))}
               </SelectContent>
             </Select>
-            <Input placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
+            <Input className="rounded-xl h-11" placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Imagem</label>
-              <Input type="file" accept="image/*" onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })} />
+              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
+              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => setProdForm({ ...prodForm, imagem: e.target.files?.[0] || null })} />
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 py-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox checked={prodForm.destaque} onCheckedChange={(c) => setProdForm({ ...prodForm, destaque: !!c })} />
                 <span className="text-sm">Destaque</span>
@@ -326,7 +326,7 @@ const Admin = () => {
                 <span className="text-sm">Disponível</span>
               </label>
             </div>
-            <Button onClick={saveProd} className="w-full">Salvar</Button>
+            <Button onClick={saveProd} className="w-full rounded-xl h-11 text-sm font-semibold">Salvar</Button>
           </div>
         </DialogContent>
       </Dialog>
