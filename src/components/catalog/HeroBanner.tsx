@@ -12,11 +12,7 @@ export const HeroBanner = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
       <div className="px-6 py-10 text-center space-y-4">
-        <span className="inline-block bg-primary/20 text-accent text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-          Personalizados
-        </span>
-
-        <img src={logoPrimary} alt="Ateliê Mimos da Preta" className="h-28 mx-auto object-contain" />
+        <img src={logoPrimary} alt="Ateliê Mimos da Preta" className="h-36 mx-auto object-contain" />
 
         <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
           Peças artesanais, bordados e costuras exclusivas feitas com carinho para você.
