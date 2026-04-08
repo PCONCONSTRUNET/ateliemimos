@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import logoPrimary from "@/assets/logo-primary.png";
 
-const WHATSAPP_NUMBER = "5500000000000";
+const WHATSAPP_NUMBER = "5548996222795";
 
 export const HeroBanner = () => {
   const handleWhatsApp = () => {
