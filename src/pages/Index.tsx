@@ -47,8 +47,6 @@ const Index = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [productImages, setProductImages] = useState<Record<string, string[]>>({});
   const navigate = useNavigate();
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
