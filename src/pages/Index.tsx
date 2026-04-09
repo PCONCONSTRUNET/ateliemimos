@@ -93,7 +93,7 @@ const Index = () => {
     return Array.from(tags).sort();
   }, [products]);
 
-  const hasActiveFilters = priceRange[0] > minPrice || priceRange[1] < maxPrice || selectedTags.length > 0;
+  const hasActiveFilters = !loading && (priceRange[0] > minPrice || priceRange[1] < maxPrice || selectedTags.length > 0);
 
   const filteredByFilters = useMemo(() => {
     return products.filter((p) => {
