@@ -76,8 +76,6 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
       msg += `💰 *Valor:* ${formatPrice(product.preco)}\n`;
     }
 
-    if (categoryName) msg += `📂 *Categoria:* ${categoryName}\n`;
-    if (product.descricao) msg += `📝 *Descrição:* ${product.descricao}\n`;
     msg += `\nPoderia me informar sobre disponibilidade e formas de pagamento?`;
     const message = encodeURIComponent(msg);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
