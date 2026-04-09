@@ -44,7 +44,7 @@ const CategoryPage = () => {
     const [catRes, catAllRes, prodRes] = await Promise.all([
       supabase.from("categories").select("*").eq("id", id!).single(),
       supabase.from("categories").select("*").order("nome"),
-      supabase.from("products").select("*").eq("categoria_id", id!).order("created_at", { ascending: false }),
+      supabase.from("products").select("*").eq("categoria_id", id!).order("position", { ascending: true }),
     ]);
     if (catRes.data) setCategory(catRes.data);
     if (catAllRes.data) setCategories(catAllRes.data);
