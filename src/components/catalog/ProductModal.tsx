@@ -65,19 +65,19 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
 
   const displayPrice = selectedVar ? selectedVar.preco : product.preco;
 
-  // v1.0.1 - Updated WhatsApp Template
+  // v1.0.2 - Aesthetic Emojis added
   const handleWhatsApp = () => {
-    let msg = `Olá! Vi este produto no catálogo e gostaria de mais informações:\n\n`;
-    msg += `*Produto:* ${product.nome}\n`;
+    let msg = `✨ Olá! Vi este produto no seu catálogo e me apaixonei:\n\n`;
+    msg += `🌸 *Produto:* ${product.nome}\n`;
     
     if (selectedVar) {
-      msg += `*Opção:* ${selectedVar.nome}\n`;
-      msg += `*Valor:* ${formatPrice(selectedVar.preco)}\n`;
+      msg += `📏 *Tamanho/Opção:* ${selectedVar.nome}\n`;
+      msg += `💰 *Valor:* ${formatPrice(selectedVar.preco)}\n`;
     } else {
-      msg += `*Valor:* ${formatPrice(product.preco)}\n`;
+      msg += `💰 *Valor:* ${formatPrice(product.preco)}\n`;
     }
 
-    msg += `\nPoderia me informar sobre a disponibilidade deste item?`;
+    msg += `\nVocê poderia me passar mais detalhes sobre ele? 🥰`;
     const message = encodeURIComponent(msg);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
   };
