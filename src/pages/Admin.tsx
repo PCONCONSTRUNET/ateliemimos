@@ -280,16 +280,16 @@ const Admin = () => {
       // Delete existing variations first (simple approach)
       await supabase.from("product_variations").delete().eq("product_id", productId);
       
-      if (prodForm.variations.length \u003e 0) {
+      if (prodForm.variations.length > 0) {
         const varsToInsert = prodForm.variations
-          .filter(v =\u003e v.nome.trim())
-          .map(v =\u003e ({
+          .filter(v => v.nome.trim())
+          .map(v => ({
             product_id: productId,
             nome: v.nome,
             preco: parseFloat(v.preco) || 0,
           }));
         
-        if (varsToInsert.length \u003e 0) {
+        if (varsToInsert.length > 0) {
           await supabase.from("product_variations").insert(varsToInsert);
         }
       }
