@@ -80,6 +80,7 @@ export type Database = {
           id: string
           imagem: string | null
           nome: string
+          position: number
           preco: number
           tags: string[] | null
           updated_at: string
@@ -93,6 +94,7 @@ export type Database = {
           id?: string
           imagem?: string | null
           nome: string
+          position?: number
           preco?: number
           tags?: string[] | null
           updated_at?: string
@@ -106,6 +108,7 @@ export type Database = {
           id?: string
           imagem?: string | null
           nome?: string
+          position?: number
           preco?: number
           tags?: string[] | null
           updated_at?: string
