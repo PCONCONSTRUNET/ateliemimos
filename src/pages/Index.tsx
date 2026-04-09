@@ -22,6 +22,7 @@ interface Category {
   id: string;
   nome: string;
   imagem: string | null;
+  position: number;
 }
 
 interface Product {
@@ -54,7 +55,7 @@ const Index = () => {
 
   const fetchData = async () => {
     const [catRes, prodRes, imgRes] = await Promise.all([
-      supabase.from("categories").select("*").order("nome"),
+      supabase.from("categories").select("*").order("position", { ascending: true }),
       supabase.from("products").select("*").order("position", { ascending: true }),
       supabase.from("product_images").select("*").order("position"),
     ]);

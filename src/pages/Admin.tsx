@@ -123,7 +123,7 @@ const Admin = () => {
 
   const fetchAll = async () => {
     const [c, p] = await Promise.all([
-      supabase.from("categories").select("*").order("nome"),
+      supabase.from("categories").select("*").order("position", { ascending: true }),
       supabase.from("products").select("*").order("position", { ascending: true }),
     ]);
     if (c.data) setCategories(c.data);
@@ -318,6 +318,8 @@ const Admin = () => {
     toast.success("Produto excluído!");
   };
 
+  const [activeTab, setActiveTab] = useState("products");
+
   const handleDragStart = (index: number) => {
     setDragIndex(index);
   };
@@ -327,24 +329,39 @@ const Admin = () => {
     setDragOverIndex(index);
   };
 
-  const handleDrop = async (index: number) => {
+  const handleDrop = async (index: number, type: "product" | "category" = "product") => {
     if (dragIndex === null || dragIndex === index) {
       setDragIndex(null);
       setDragOverIndex(null);
       return;
     }
-    const updated = [...products];
-    const [moved] = updated.splice(dragIndex, 1);
-    updated.splice(index, 0, moved);
-    setProducts(updated);
-    setDragIndex(null);
-    setDragOverIndex(null);
+    
+    if (type === "product") {
+      const updated = [...products];
+      const [moved] = updated.splice(dragIndex, 1);
+      updated.splice(index, 0, moved);
+      setProducts(updated);
+      setDragIndex(null);
+      setDragOverIndex(null);
 
-    // Save new positions to DB
-    const promises = updated.map((p, i) =>
-      supabase.from("products").update({ position: i }).eq("id", p.id)
-    );
-    await Promise.all(promises);
+      const promises = updated.map((p, i) =>
+        supabase.from("products").update({ position: i }).eq("id", p.id)
+      );
+      await Promise.all(promises);
+    } else {
+      const updated = [...categories];
+      const [moved] = updated.splice(dragIndex, 1);
+      updated.splice(index, 0, moved);
+      setCategories(updated);
+      setDragIndex(null);
+      setDragOverIndex(null);
+
+      const promises = updated.map((c, i) =>
+        supabase.from("categories").update({ position: i }).eq("id", c.id)
+      );
+      await Promise.all(promises);
+    }
+    
     toast.success("Ordem atualizada!");
   };
 
@@ -360,11 +377,13 @@ const Admin = () => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     const touch = e.touches[0];
-    const elements = document.querySelectorAll("[data-product-index]");
+    const selector = activeTab === "products" ? "[data-product-index]" : "[data-category-index]";
+    const elements = document.querySelectorAll(selector);
     elements.forEach((el) => {
       const rect = el.getBoundingClientRect();
       if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-        const idx = parseInt(el.getAttribute("data-product-index") || "-1");
+        const attr = activeTab === "products" ? "data-product-index" : "data-category-index";
+        const idx = parseInt(el.getAttribute(attr) || "-1");
         if (idx >= 0) setDragOverIndex(idx);
       }
     });
@@ -372,7 +391,7 @@ const Admin = () => {
 
   const handleTouchEnd = () => {
     if (dragOverIndex !== null && dragIndex !== null) {
-      handleDrop(dragOverIndex);
+      handleDrop(dragOverIndex, activeTab === "products" ? "product" : "category");
     } else {
       setDragIndex(null);
       setDragOverIndex(null);
@@ -401,7 +420,7 @@ const Admin = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="products">
+        <Tabs defaultValue="products" onValueChange={setActiveTab}>
           <TabsList className="mb-6 bg-primary/10 rounded-full p-1 h-auto">
             <TabsTrigger value="products" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Produtos ({products.length})</TabsTrigger>
             <TabsTrigger value="categories" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Categorias ({categories.length})</TabsTrigger>
@@ -423,7 +442,7 @@ const Admin = () => {
                   draggable
                   onDragStart={() => handleDragStart(idx)}
                   onDragOver={(e) => handleDragOver(e, idx)}
-                  onDrop={() => handleDrop(idx)}
+                  onDrop={() => handleDrop(idx, "product")}
                   onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
                   onTouchStart={(e) => handleTouchStart(idx, e)}
                   onTouchMove={handleTouchMove}
@@ -469,10 +488,26 @@ const Admin = () => {
                 <Plus className="h-4 w-4" /> Nova Categoria
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground mb-3">↕ Arraste para reordenar a ordem das categorias no site</p>
             <div className="grid gap-3">
-              {categories.map((c) => (
-                <Card key={c.id} className="rounded-2xl">
+              {categories.map((c, idx) => (
+                <Card 
+                  key={c.id} 
+                  data-category-index={idx}
+                  draggable
+                  onDragStart={() => handleDragStart(idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDrop={() => handleDrop(idx, "category")}
+                  onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                  onTouchStart={(e) => handleTouchStart(idx, e)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  className={`rounded-2xl transition-all cursor-grab active:cursor-grabbing ${
+                    dragIndex === idx ? "opacity-50 scale-95" : ""
+                  } ${dragOverIndex === idx && dragIndex !== idx ? "border-primary border-2" : ""}`}
+                >
                   <CardContent className="flex items-center gap-4 p-4">
+                    <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     {c.imagem ? (
                       <img src={c.imagem} alt={c.nome} className="w-12 h-12 rounded-md object-cover" />
                     ) : (
