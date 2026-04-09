@@ -272,6 +272,7 @@ const Admin = () => {
             url,
             position: startPos + i,
           });
+        }
       }
     }
 
