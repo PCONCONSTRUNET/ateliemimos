@@ -206,6 +206,7 @@ const Admin = () => {
         disponivel: prod.disponivel,
         imagem: null,
         tags: (prod.tags || []).join(", "),
+        variations: [],
       });
       setProdPreview(prod.imagem || null);
       const [imgs, vars] = await Promise.all([
