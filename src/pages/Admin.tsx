@@ -402,7 +402,7 @@ const Admin = () => {
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openProdModal(p)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteProd(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ type: "product", id: p.id, name: p.nome })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -430,7 +430,7 @@ const Admin = () => {
                     <h3 className="flex-1 font-medium">{c.nome}</h3>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openCatModal(c)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteCat(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ type: "category", id: c.id, name: c.nome })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -555,6 +555,33 @@ const Admin = () => {
         onCropComplete={handleCropComplete}
         onCancel={() => { setCropperOpen(false); setCropperSrc(""); }}
       />
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent className="max-w-sm rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">
+              Excluir {deleteConfirm?.type === "product" ? "produto" : "categoria"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteConfirm?.name}</strong>? Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteConfirm?.type === "product") deleteProd(deleteConfirm.id);
+                else if (deleteConfirm?.type === "category") deleteCat(deleteConfirm.id);
+                setDeleteConfirm(null);
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
