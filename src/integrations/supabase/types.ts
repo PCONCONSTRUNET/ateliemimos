@@ -22,6 +22,7 @@ export type Database = {
           nome: string
           position: number
           updated_at: string
+          visivel: boolean
         }
         Insert: {
           created_at?: string
@@ -30,6 +31,7 @@ export type Database = {
           nome: string
           position?: number
           updated_at?: string
+          visivel?: boolean
         }
         Update: {
           created_at?: string
@@ -38,6 +40,7 @@ export type Database = {
           nome?: string
           position?: number
           updated_at?: string
+          visivel?: boolean
         }
         Relationships: []
       }

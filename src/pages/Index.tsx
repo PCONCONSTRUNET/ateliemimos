@@ -59,7 +59,9 @@ const Index = () => {
       supabase.from("products").select("*").order("position", { ascending: true }),
       supabase.from("product_images").select("*").order("position"),
     ]);
-    if (catRes.data) setCategories(catRes.data);
+    if (catRes.data) {
+      setCategories(catRes.data.filter((c) => c.visivel !== false));
+    }
     if (prodRes.data) {
       setProducts(prodRes.data);
       const prices = prodRes.data.map((p) => p.preco);

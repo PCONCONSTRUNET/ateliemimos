@@ -19,6 +19,7 @@ interface Category {
   id: string;
   nome: string;
   imagem: string | null;
+  visivel: boolean;
 }
 
 interface Product {
@@ -55,7 +56,7 @@ const Admin = () => {
   const [prodModal, setProdModal] = useState(false);
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [editingProd, setEditingProd] = useState<Product | null>(null);
-  const [catForm, setCatForm] = useState({ nome: "", imagem: null as File | null });
+  const [catForm, setCatForm] = useState({ nome: "", imagem: null as File | null, visivel: true });
   const [prodForm, setProdForm] = useState({
     nome: "",
     preco: "",
@@ -145,10 +146,10 @@ const Admin = () => {
   const openCatModal = (cat?: Category) => {
     if (cat) {
       setEditingCat(cat);
-      setCatForm({ nome: cat.nome, imagem: null });
+      setCatForm({ nome: cat.nome, imagem: null, visivel: cat.visivel });
     } else {
       setEditingCat(null);
-      setCatForm({ nome: "", imagem: null });
+      setCatForm({ nome: "", imagem: null, visivel: true });
     }
     setCatPreview(cat?.imagem || null);
     setCatModal(true);
@@ -159,10 +160,11 @@ const Admin = () => {
     if (catForm.imagem) {
       imageUrl = await uploadImage(catForm.imagem, "categories");
     }
+    const data = { nome: catForm.nome, imagem: imageUrl, visivel: catForm.visivel };
     if (editingCat) {
-      await supabase.from("categories").update({ nome: catForm.nome, imagem: imageUrl }).eq("id", editingCat.id);
+      await supabase.from("categories").update(data).eq("id", editingCat.id);
     } else {
-      await supabase.from("categories").insert({ nome: catForm.nome, imagem: imageUrl });
+      await supabase.from("categories").insert(data);
     }
     setCatModal(false);
     fetchAll();
@@ -513,7 +515,12 @@ const Admin = () => {
                     ) : (
                       <div className="w-12 h-12 rounded-md bg-muted" />
                     )}
-                    <h3 className="flex-1 font-medium">{c.nome}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium truncate">{c.nome}</h3>
+                      {!c.visivel && (
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Oculta</span>
+                      )}
+                    </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openCatModal(c)}><Pencil className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ type: "category", id: c.id, name: c.nome })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
@@ -543,7 +550,13 @@ const Admin = () => {
               )}
               <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "category"); }} />
             </div>
-            <Button onClick={saveCat} className="w-full rounded-xl h-11 text-sm font-semibold">Salvar</Button>
+            <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-xl border border-border/50">
+              <Checkbox id="cat-visivel" checked={catForm.visivel} onCheckedChange={(c) => setCatForm({ ...catForm, visivel: !!c })} />
+              <label htmlFor="cat-visivel" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                Visível no site
+              </label>
+            </div>
+            <Button onClick={saveCat} className="w-full rounded-xl h-11 text-sm font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.01]">Salvar</Button>
           </div>
         </DialogContent>
       </Dialog>
