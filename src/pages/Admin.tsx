@@ -40,6 +40,12 @@ interface ProductImage {
   position: number;
 }
 
+interface ProductVariation {
+  id?: string;
+  nome: string;
+  preco: string;
+}
+
 const Admin = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +65,7 @@ const Admin = () => {
     disponivel: true,
     imagem: null as File | null,
     tags: "",
+    variations: [] as ProductVariation[],
   });
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropperSrc, setCropperSrc] = useState("");
@@ -177,6 +184,15 @@ const Admin = () => {
     return (data || []) as ProductImage[];
   };
 
+  const fetchProductVariations = async (productId: string) => {
+    const { data } = await supabase
+      .from("product_variations")
+      .select("*")
+      .eq("product_id", productId)
+      .order("created_at");
+    return (data || []).map(v => ({ ...v, preco: String(v.preco) })) as ProductVariation[];
+  };
+
   const openProdModal = async (prod?: Product) => {
     setPendingExtraFiles([]);
     if (prod) {
@@ -192,11 +208,25 @@ const Admin = () => {
         tags: (prod.tags || []).join(", "),
       });
       setProdPreview(prod.imagem || null);
-      const imgs = await fetchProductImages(prod.id);
+      const [imgs, vars] = await Promise.all([
+        fetchProductImages(prod.id),
+        fetchProductVariations(prod.id)
+      ]);
       setExtraImages(imgs);
+      setProdForm(prev => ({ ...prev, variations: vars }));
     } else {
       setEditingProd(null);
-      setProdForm({ nome: "", preco: "", descricao: "", categoria_id: "", destaque: false, disponivel: true, imagem: null, tags: "" });
+      setProdForm({ 
+        nome: "", 
+        preco: "", 
+        descricao: "", 
+        categoria_id: "", 
+        destaque: false, 
+        disponivel: true, 
+        imagem: null, 
+        tags: "",
+        variations: []
+      });
       setProdPreview(null);
       setExtraImages([]);
     }
@@ -242,6 +272,25 @@ const Admin = () => {
             url,
             position: startPos + i,
           });
+      }
+    }
+
+    // Save variations
+    if (productId) {
+      // Delete existing variations first (simple approach)
+      await supabase.from("product_variations").delete().eq("product_id", productId);
+      
+      if (prodForm.variations.length \u003e 0) {
+        const varsToInsert = prodForm.variations
+          .filter(v =\u003e v.nome.trim())
+          .map(v =\u003e ({
+            product_id: productId,
+            nome: v.nome,
+            preco: parseFloat(v.preco) || 0,
+          }));
+        
+        if (varsToInsert.length \u003e 0) {
+          await supabase.from("product_variations").insert(varsToInsert);
         }
       }
     }
@@ -541,6 +590,72 @@ const Admin = () => {
                 <Checkbox checked={prodForm.disponivel} onCheckedChange={(c) => setProdForm({ ...prodForm, disponivel: !!c })} />
                 <span className="text-sm">Disponível</span>
               </label>
+            </div>
+
+            {/* Variations Section */}
+            <div className="pt-2 border-t border-border">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  📏 Variações (Tamanho/Modelo)
+                </label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-7 text-[10px] rounded-full px-2"
+                  onClick={() => setProdForm(prev => ({ 
+                    ...prev, 
+                    variations: [...prev.variations, { nome: "", preco: "" }] 
+                  }))}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                {prodForm.variations.map((v, i) => (
+                  <div key={i} className="flex gap-2 items-center animate-in fade-in slide-in-from-top-1 duration-200">
+                    <Input 
+                      className="rounded-xl h-9 text-xs flex-[2]" 
+                      placeholder="Ex: Tamanho P" 
+                      value={v.nome}
+                      onChange={(e) => {
+                        const newVars = [...prodForm.variations];
+                        newVars[i].nome = e.target.value;
+                        setProdForm(prev => ({ ...prev, variations: newVars }));
+                      }}
+                    />
+                    <Input 
+                      className="rounded-xl h-9 text-xs flex-1" 
+                      placeholder="R$ Valor" 
+                      type="number"
+                      step="0.01"
+                      value={v.preco}
+                      onChange={(e) => {
+                        const newVars = [...prodForm.variations];
+                        newVars[i].preco = e.target.value;
+                        setProdForm(prev => ({ ...prev, variations: newVars }));
+                      }}
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive"
+                      onClick={() => setProdForm(prev => ({ 
+                        ...prev, 
+                        variations: prev.variations.filter((_, idx) => idx !== i) 
+                      }))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {prodForm.variations.length === 0 && (
+                  <p className="text-[10px] text-muted-foreground italic text-center py-2">
+                    Nenhuma variação adicionada. O preço base será usado.
+                  </p>
+                )}
+              </div>
             </div>
             <Button onClick={saveProd} className="w-full rounded-xl h-11 text-sm font-semibold">Salvar</Button>
           </div>
