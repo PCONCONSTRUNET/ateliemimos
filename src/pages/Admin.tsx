@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Plus, Pencil, Trash2, X, ImagePlus, GripVertical } from "lucide-react";
 import { toast } from "sonner";
@@ -69,6 +70,7 @@ const Admin = () => {
   const [pendingExtraFiles, setPendingExtraFiles] = useState<{ file: File; preview: string }[]>([]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "product" | "category"; id: string; name: string } | null>(null);
   const navigate = useNavigate();
 
   const handleFileSelect = (file: File, target: "product" | "category" | "extra") => {
@@ -161,7 +163,6 @@ const Admin = () => {
   };
 
   const deleteCat = async (id: string) => {
-    if (!confirm("Excluir esta categoria?")) return;
     await supabase.from("categories").delete().eq("id", id);
     fetchAll();
     toast.success("Categoria excluída!");
@@ -261,7 +262,6 @@ const Admin = () => {
   };
 
   const deleteProd = async (id: string) => {
-    if (!confirm("Excluir este produto?")) return;
     await supabase.from("products").delete().eq("id", id);
     fetchAll();
     toast.success("Produto excluído!");
