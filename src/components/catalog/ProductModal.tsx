@@ -65,6 +65,7 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
 
   const displayPrice = selectedVar ? selectedVar.preco : product.preco;
 
+  // v1.0.1 - Updated WhatsApp Template
   const handleWhatsApp = () => {
     let msg = `Olá! Vi este produto no catálogo e gostaria de mais informações:\n\n`;
     msg += `*Produto:* ${product.nome}\n`;
