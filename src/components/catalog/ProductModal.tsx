@@ -125,18 +125,18 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
               <label className="text-xs font-semibold text-foreground">Escolha uma opção:</label>
               <div className="flex flex-wrap gap-2">
                 {variations.map((v) => (
-                  \u003cbutton
+                  <button
                     key={v.id}
-                    onClick={() =\u003e setSelectedVar(v)}
+                    onClick={() => setSelectedVar(v)}
                     className={cn(
-                      \"px-4 py-2 rounded-xl text-xs font-medium border-2 transition-all\",
+                      "px-4 py-2 rounded-xl text-xs font-medium border-2 transition-all",
                       selectedVar?.id === v.id
-                        ? \"border-primary bg-primary/5 text-primary\"
-                        : \"border-border hover:border-primary/30 text-muted-foreground\"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border hover:border-primary/30 text-muted-foreground"
                     )}
-                  \u003e
+                  >
                     {v.nome} - {formatPrice(v.preco)}
-                  \u003c/button\u003e
+                  </button>
                 ))}
               </div>
             </div>
