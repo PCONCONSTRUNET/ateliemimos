@@ -66,17 +66,17 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
   const displayPrice = selectedVar ? selectedVar.preco : product.preco;
 
   const handleWhatsApp = () => {
-    let msg = `Olá! Gostaria de fazer um pedido:\n\n`;
-    msg += `📦 *Produto:* ${product.nome}\n`;
+    let msg = `Olá! Vi este produto no catálogo e gostaria de mais informações:\n\n`;
+    msg += `*Produto:* ${product.nome}\n`;
     
     if (selectedVar) {
-      msg += `📏 *Variação:* ${selectedVar.nome}\n`;
-      msg += `💰 *Valor:* ${formatPrice(selectedVar.preco)}\n`;
+      msg += `*Opção:* ${selectedVar.nome}\n`;
+      msg += `*Valor:* ${formatPrice(selectedVar.preco)}\n`;
     } else {
-      msg += `💰 *Valor:* ${formatPrice(product.preco)}\n`;
+      msg += `*Valor:* ${formatPrice(product.preco)}\n`;
     }
 
-    msg += `\nPoderia me informar sobre disponibilidade e formas de pagamento?`;
+    msg += `\nPoderia me informar sobre a disponibilidade deste item?`;
     const message = encodeURIComponent(msg);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
   };
