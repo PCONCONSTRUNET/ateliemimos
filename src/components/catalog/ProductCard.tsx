@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { productImages } from "@/lib/sample-images";
 
 interface Product {
   id: string;
@@ -19,17 +18,15 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
-  const imageUrl = product.imagem || productImages[product.nome] || null;
-
   return (
     <button
       onClick={onClick}
       className="group w-full text-left bg-card rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
-        {imageUrl ? (
+        {product.imagem ? (
           <img
-            src={imageUrl}
+            src={product.imagem}
             alt={product.nome}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

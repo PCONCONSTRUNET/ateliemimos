@@ -6,7 +6,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ProductImageCarousel } from "./ProductImageCarousel";
-import { productImages } from "@/lib/sample-images";
 
 interface Product {
   id: string;
@@ -48,8 +47,7 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
 
   // Build image list: main image + extra images from product_images table
   const allImages: string[] = [];
-  const mainImg = product.imagem || productImages[product.nome] || null;
-  if (mainImg) allImages.push(mainImg);
+  if (product.imagem) allImages.push(product.imagem);
   extraImages.forEach((url) => {
     if (!allImages.includes(url)) allImages.push(url);
   });

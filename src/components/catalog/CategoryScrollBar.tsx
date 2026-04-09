@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { categoryImages } from "@/lib/sample-images";
 
 interface Category {
   id: string;
@@ -44,7 +43,6 @@ export const CategoryScrollBar = ({ categories, onSelect }: CategoryScrollBarPro
 
   return (
     <div className="relative">
-      {/* Left arrow */}
       {canScrollLeft && (
         <button
           onClick={() => scroll("left")}
@@ -54,39 +52,34 @@ export const CategoryScrollBar = ({ categories, onSelect }: CategoryScrollBarPro
         </button>
       )}
 
-      {/* Scrollable categories */}
       <div
         ref={scrollRef}
         className="flex gap-3 overflow-x-auto scrollbar-hide px-1 py-2 snap-x snap-mandatory"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {categories.map((cat, index) => {
-          const img = cat.imagem || categoryImages[cat.nome] || null;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => onSelect(cat.id)}
-              className="flex-shrink-0 snap-start flex flex-col items-center gap-1.5 group opacity-0 animate-fade-in"
-              style={{ animationDelay: `${index * 0.06}s` }}
-            >
-              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors shadow-sm">
-                {img ? (
-                  <img src={img} alt={cat.nome} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-serif">
-                    {cat.nome.charAt(0)}
-                  </div>
-                )}
-              </div>
-              <span className="text-[11px] text-foreground font-medium text-center leading-tight max-w-[72px] truncate">
-                {cat.nome}
-              </span>
-            </button>
-          );
-        })}
+        {categories.map((cat, index) => (
+          <button
+            key={cat.id}
+            onClick={() => onSelect(cat.id)}
+            className="flex-shrink-0 snap-start flex flex-col items-center gap-1.5 group opacity-0 animate-fade-in"
+            style={{ animationDelay: `${index * 0.06}s` }}
+          >
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors shadow-sm">
+              {cat.imagem ? (
+                <img src={cat.imagem} alt={cat.nome} className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-serif">
+                  {cat.nome.charAt(0)}
+                </div>
+              )}
+            </div>
+            <span className="text-[11px] text-foreground font-medium text-center leading-tight max-w-[72px] truncate">
+              {cat.nome}
+            </span>
+          </button>
+        ))}
       </div>
 
-      {/* Right arrow */}
       {canScrollRight && (
         <button
           onClick={() => scroll("right")}
