@@ -55,7 +55,7 @@ const Index = () => {
   const fetchData = async () => {
     const [catRes, prodRes, imgRes] = await Promise.all([
       supabase.from("categories").select("*").order("nome"),
-      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("products").select("*").order("position", { ascending: true }),
       supabase.from("product_images").select("*").order("position"),
     ]);
     if (catRes.data) setCategories(catRes.data);

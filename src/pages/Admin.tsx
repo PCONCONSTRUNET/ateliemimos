@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Plus, Pencil, Trash2, X, ImagePlus } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, X, ImagePlus, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { ImageCropper } from "@/components/catalog/ImageCropper";
@@ -67,6 +67,8 @@ const Admin = () => {
   // Multi-image states
   const [extraImages, setExtraImages] = useState<ProductImage[]>([]);
   const [pendingExtraFiles, setPendingExtraFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleFileSelect = (file: File, target: "product" | "category" | "extra") => {
@@ -113,7 +115,7 @@ const Admin = () => {
   const fetchAll = async () => {
     const [c, p] = await Promise.all([
       supabase.from("categories").select("*").order("nome"),
-      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("products").select("*").order("position", { ascending: true }),
     ]);
     if (c.data) setCategories(c.data);
     if (p.data) setProducts(p.data);
@@ -265,6 +267,67 @@ const Admin = () => {
     toast.success("Produto excluído!");
   };
 
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = async (index: number) => {
+    if (dragIndex === null || dragIndex === index) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const updated = [...products];
+    const [moved] = updated.splice(dragIndex, 1);
+    updated.splice(index, 0, moved);
+    setProducts(updated);
+    setDragIndex(null);
+    setDragOverIndex(null);
+
+    // Save new positions to DB
+    const promises = updated.map((p, i) =>
+      supabase.from("products").update({ position: i }).eq("id", p.id)
+    );
+    await Promise.all(promises);
+    toast.success("Ordem atualizada!");
+  };
+
+  // Touch drag support
+  const touchStartY = { current: 0 };
+  const touchDragIdx = { current: -1 };
+
+  const handleTouchStart = (index: number, e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchDragIdx.current = index;
+    setDragIndex(index);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const elements = document.querySelectorAll("[data-product-index]");
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        const idx = parseInt(el.getAttribute("data-product-index") || "-1");
+        if (idx >= 0) setDragOverIndex(idx);
+      }
+    });
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOverIndex !== null && dragIndex !== null) {
+      handleDrop(dragOverIndex);
+    } else {
+      setDragIndex(null);
+      setDragOverIndex(null);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
@@ -300,14 +363,30 @@ const Admin = () => {
                 <Plus className="h-4 w-4" /> Novo Produto
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground mb-3">↕ Arraste para reordenar a exibição no catálogo</p>
             <div className="grid gap-3">
-              {products.map((p) => (
-                <Card key={p.id} className="rounded-2xl">
-                  <CardContent className="flex items-center gap-4 p-4">
+              {products.map((p, idx) => (
+                <Card
+                  key={p.id}
+                  data-product-index={idx}
+                  draggable
+                  onDragStart={() => handleDragStart(idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDrop={() => handleDrop(idx)}
+                  onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                  onTouchStart={(e) => handleTouchStart(idx, e)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  className={`rounded-2xl transition-all cursor-grab active:cursor-grabbing ${
+                    dragIndex === idx ? "opacity-50 scale-95" : ""
+                  } ${dragOverIndex === idx && dragIndex !== idx ? "border-primary border-2" : ""}`}
+                >
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     {p.imagem ? (
-                      <img src={p.imagem} alt={p.nome} className="w-16 h-16 rounded-md object-cover" />
+                      <img src={p.imagem} alt={p.nome} className="w-14 h-14 rounded-md object-cover" />
                     ) : (
-                      <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">Sem img</div>
+                      <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">Sem img</div>
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{p.nome}</h3>
