@@ -91,13 +91,13 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
 
   return (
     <Dialog open={!!product} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-md w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto p-0 bg-card rounded-2xl gap-0">
+      <DialogContent className="max-w-md w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto p-0 bg-card rounded-2xl gap-0">
         {/* Image carousel */}
         {allImages.length > 0 && (
           <ProductImageCarousel
             images={allImages}
             alt={product.nome}
-            className="w-full aspect-square"
+            className="w-full aspect-[4/3]"
           />
         )}
 
