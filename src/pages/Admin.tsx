@@ -15,6 +15,28 @@ import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { ImageCropper } from "@/components/catalog/ImageCropper";
 
+// Aceita formatos: "1650", "1650.00", "1650,00", "1.650,00", "1,650.00"
+const parseBRL = (input: string): number => {
+  if (!input) return 0;
+  let s = String(input).trim().replace(/[^\d.,-]/g, "");
+  if (!s) return 0;
+  const hasComma = s.includes(",");
+  const hasDot = s.includes(".");
+  if (hasComma && hasDot) {
+    // separador decimal é o último símbolo
+    if (s.lastIndexOf(",") > s.lastIndexOf(".")) {
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else {
+      s = s.replace(/,/g, "");
+    }
+  } else if (hasComma) {
+    // só vírgula -> decimal BR
+    s = s.replace(/\./g, "").replace(",", ".");
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+};
+
 interface Category {
   id: string;
   nome: string;
@@ -247,7 +269,7 @@ const Admin = () => {
       .filter(Boolean);
     const data = {
       nome: prodForm.nome,
-      preco: parseFloat(prodForm.preco) || 0,
+      preco: parseBRL(prodForm.preco),
       descricao: prodForm.descricao || null,
       categoria_id: prodForm.categoria_id || null,
       destaque: prodForm.destaque,
@@ -290,7 +312,7 @@ const Admin = () => {
           .map(v => ({
             product_id: productId,
             nome: v.nome,
-            preco: parseFloat(v.preco) || 0,
+            preco: parseBRL(v.preco),
           }));
         
         if (varsToInsert.length > 0) {
