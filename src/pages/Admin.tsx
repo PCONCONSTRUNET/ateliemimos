@@ -15,6 +15,28 @@ import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { ImageCropper } from "@/components/catalog/ImageCropper";
 
+// Aceita formatos: "1650", "1650.00", "1650,00", "1.650,00", "1,650.00"
+const parseBRL = (input: string): number => {
+  if (!input) return 0;
+  let s = String(input).trim().replace(/[^\d.,-]/g, "");
+  if (!s) return 0;
+  const hasComma = s.includes(",");
+  const hasDot = s.includes(".");
+  if (hasComma && hasDot) {
+    // separador decimal é o último símbolo
+    if (s.lastIndexOf(",") > s.lastIndexOf(".")) {
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else {
+      s = s.replace(/,/g, "");
+    }
+  } else if (hasComma) {
+    // só vírgula -> decimal BR
+    s = s.replace(/\./g, "").replace(",", ".");
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+};
+
 interface Category {
   id: string;
   nome: string;
@@ -247,7 +269,7 @@ const Admin = () => {
       .filter(Boolean);
     const data = {
       nome: prodForm.nome,
-      preco: parseFloat(prodForm.preco) || 0,
+      preco: parseBRL(prodForm.preco),
       descricao: prodForm.descricao || null,
       categoria_id: prodForm.categoria_id || null,
       destaque: prodForm.destaque,
@@ -290,7 +312,7 @@ const Admin = () => {
           .map(v => ({
             product_id: productId,
             nome: v.nome,
-            preco: parseFloat(v.preco) || 0,
+            preco: parseBRL(v.preco),
           }));
         
         if (varsToInsert.length > 0) {
@@ -570,7 +592,7 @@ const Admin = () => {
           </DialogHeader>
           <div className="px-5 pb-5 space-y-3.5">
             <Input className="rounded-xl h-11" placeholder="Nome do produto" value={prodForm.nome} onChange={(e) => setProdForm({ ...prodForm, nome: e.target.value })} />
-            <Input className="rounded-xl h-11" placeholder="Preço (ex: 89.90)" type="number" step="0.01" value={prodForm.preco} onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })} />
+            <Input className="rounded-xl h-11" placeholder="Preço (ex: 1.650,00 ou 89,90)" type="text" inputMode="decimal" value={prodForm.preco} onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })} />
             <Textarea className="rounded-xl min-h-[80px]" placeholder="Descrição do produto" value={prodForm.descricao} onChange={(e) => setProdForm({ ...prodForm, descricao: e.target.value })} />
             <Select value={prodForm.categoria_id} onValueChange={(v) => setProdForm({ ...prodForm, categoria_id: v })}>
               <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Selecione uma categoria" /></SelectTrigger>
@@ -677,9 +699,9 @@ const Admin = () => {
                     />
                     <Input 
                       className="rounded-xl h-9 text-xs flex-1" 
-                      placeholder="R$ Valor" 
-                      type="number"
-                      step="0.01"
+                      placeholder="R$ Valor (ex: 1.650,00)" 
+                      type="text"
+                      inputMode="decimal"
                       value={v.preco}
                       onChange={(e) => {
                         const newVars = [...prodForm.variations];
