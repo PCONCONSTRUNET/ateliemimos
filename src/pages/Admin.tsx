@@ -487,10 +487,13 @@ const Admin = () => {
                       <p className="text-sm text-primary font-semibold">
                         {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.preco)}
                       </p>
-                      <div className="flex gap-2 mt-1">
+                      <div className="flex flex-wrap gap-2 mt-1">
                         {p.destaque && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">Destaque</span>}
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${p.disponivel ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                           {p.disponivel ? "Disponível" : "Sob encomenda"}
+                        </span>
+                        <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                          {categories.find((c) => c.id === p.categoria_id)?.nome ?? "Sem categoria"}
                         </span>
                       </div>
                     </div>
