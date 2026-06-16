@@ -134,6 +134,26 @@ const Admin = () => {
     }
   };
 
+  const handlePasteMainImage = (e: React.ClipboardEvent) => {
+    if (e.clipboardData.files.length > 0) {
+      e.preventDefault();
+      const file = Array.from(e.clipboardData.files).find(f => f.type.startsWith("image/"));
+      if (file) handleFileSelect(file, "product");
+    }
+  };
+
+  const handleDragOverMain = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDropMain = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length > 0) {
+      const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith("image/"));
+      if (file) handleFileSelect(file, "product");
+    }
+  };
+
   const handleFileSelect = (file: File, target: "product" | "category" | "extra") => {
     if (target === "extra") {
       handleMultipleFiles([file]);
@@ -641,12 +661,21 @@ const Admin = () => {
             <Input className="rounded-xl h-11" placeholder="Tags (separar por vírgula: Feito à mão, Sob encomenda)" value={prodForm.tags} onChange={(e) => setProdForm({ ...prodForm, tags: e.target.value })} />
 
             {/* Main image */}
-            <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem principal</label>
+            <div
+              onPaste={handlePasteMainImage}
+              onDragOver={handleDragOverMain}
+              onDrop={handleDropMain}
+              tabIndex={0}
+              className="outline-none focus:ring-2 focus:ring-primary/30 rounded-xl transition-all p-3 bg-muted/10 border-2 border-dashed border-border/50 hover:border-primary/40 cursor-default"
+            >
+              <label className="text-xs text-muted-foreground mb-3 block font-medium text-center">
+                Imagem principal <br/>
+                <span className="font-normal text-[10px]">(Arraste a imagem aqui ou clique e cole com Ctrl+V)</span>
+              </label>
               {prodPreview && (
-                <img src={prodPreview} alt="Preview" className="w-full h-40 object-cover rounded-xl mb-2 border border-border" />
+                <img src={prodPreview} alt="Preview" className="w-full h-40 object-cover rounded-xl mb-3 border border-border shadow-sm" />
               )}
-              <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "product"); }} />
+              <Input className="rounded-xl cursor-pointer" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "product"); e.target.value = ''; }} />
             </div>
 
             {/* Extra images */}
