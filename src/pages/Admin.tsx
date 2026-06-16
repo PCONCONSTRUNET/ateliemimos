@@ -103,7 +103,42 @@ const Admin = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: "product" | "category"; id: string; name: string } | null>(null);
   const navigate = useNavigate();
 
+  const handleMultipleFiles = (files: FileList | File[]) => {
+    const newPending: { file: File; preview: string }[] = [];
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const url = URL.createObjectURL(file);
+        newPending.push({ file, preview: url });
+      }
+    });
+    if (newPending.length > 0) {
+      setPendingExtraFiles((prev) => [...prev, ...newPending]);
+    }
+  };
+
+  const handlePasteExtraImages = (e: React.ClipboardEvent) => {
+    if (e.clipboardData.files.length > 0) {
+      e.preventDefault();
+      handleMultipleFiles(e.clipboardData.files);
+    }
+  };
+
+  const handleDragOverExtra = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDropExtra = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length > 0) {
+      handleMultipleFiles(e.dataTransfer.files);
+    }
+  };
+
   const handleFileSelect = (file: File, target: "product" | "category" | "extra") => {
+    if (target === "extra") {
+      handleMultipleFiles([file]);
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       setCropperSrc(reader.result as string);
@@ -615,9 +650,18 @@ const Admin = () => {
             </div>
 
             {/* Extra images */}
-            <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagens adicionais</label>
-              <div className="grid grid-cols-3 gap-2 mb-2">
+            <div
+              onPaste={handlePasteExtraImages}
+              onDragOver={handleDragOverExtra}
+              onDrop={handleDropExtra}
+              tabIndex={0}
+              className="outline-none focus:ring-2 focus:ring-primary/30 rounded-xl transition-all p-3 bg-muted/10 border-2 border-dashed border-border/50 hover:border-primary/40 cursor-default"
+            >
+              <label className="text-xs text-muted-foreground mb-3 block font-medium text-center">
+                Imagens adicionais <br/>
+                <span className="font-normal text-[10px]">(Arraste imagens aqui ou clique e cole com Ctrl+V)</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
                 {/* Existing saved images */}
                 {extraImages.map((img) => (
                   <div key={img.id} className="relative group">
@@ -643,14 +687,20 @@ const Admin = () => {
                   </div>
                 ))}
                 {/* Add button */}
-                <label className="w-full aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                <label className="w-full aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
                   <ImagePlus className="h-5 w-5 text-muted-foreground mb-1" />
-                  <span className="text-[10px] text-muted-foreground">Adicionar</span>
+                  <span className="text-[10px] text-muted-foreground text-center leading-tight">Adicionar<br/>(Múltiplas)</span>
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "extra"); }}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleMultipleFiles(e.target.files);
+                      }
+                      e.target.value = '';
+                    }}
                   />
                 </label>
               </div>
