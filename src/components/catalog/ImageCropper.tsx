@@ -159,6 +159,7 @@ export const ImageCropper = ({
                 src={imageSrc}
                 alt="Recortar"
                 onLoad={onImageLoad}
+                crossOrigin="anonymous"
                 style={{ maxHeight: "50vh", maxWidth: "100%", width: "auto" }}
                 className="block"
               />

@@ -92,7 +92,9 @@ const Admin = () => {
   });
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropperSrc, setCropperSrc] = useState("");
-  const [cropperTarget, setCropperTarget] = useState<"product" | "category" | "extra">("product");
+  const [cropperTarget, setCropperTarget] = useState<"product" | "category" | "extra" | "extra_existing" | "extra_pending">("product");
+  const [editingExtraId, setEditingExtraId] = useState<string | null>(null);
+  const [editingPendingIndex, setEditingPendingIndex] = useState<number | null>(null);
   const [prodPreview, setProdPreview] = useState<string | null>(null);
   const [catPreview, setCatPreview] = useState<string | null>(null);
   // Multi-image states
@@ -168,7 +170,7 @@ const Admin = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = async (croppedFile: File) => {
     const url = URL.createObjectURL(croppedFile);
     if (cropperTarget === "product") {
       setProdForm((prev) => ({ ...prev, imagem: croppedFile }));
@@ -178,9 +180,26 @@ const Admin = () => {
       setCatPreview(url);
     } else if (cropperTarget === "extra") {
       setPendingExtraFiles((prev) => [...prev, { file: croppedFile, preview: url }]);
+    } else if (cropperTarget === "extra_pending" && editingPendingIndex !== null) {
+      setPendingExtraFiles((prev) => {
+        const newArr = [...prev];
+        newArr[editingPendingIndex] = { file: croppedFile, preview: url };
+        return newArr;
+      });
+    } else if (cropperTarget === "extra_existing" && editingExtraId) {
+      const img = extraImages.find(i => i.id === editingExtraId);
+      if (img) {
+        await supabase.from("product_images").delete().eq("id", img.id);
+        setExtraImages((prev) => prev.filter((i) => i.id !== img.id));
+        setPendingExtraFiles((prev) => [...prev, { file: croppedFile, preview: url }]);
+        toast.success("Imagem ajustada! Salve o produto para aplicar.");
+      }
     }
+    
     setCropperOpen(false);
     setCropperSrc("");
+    setEditingExtraId(null);
+    setEditingPendingIndex(null);
   };
 
   useEffect(() => {
@@ -626,7 +645,16 @@ const Admin = () => {
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Imagem</label>
               {catPreview && (
-                <img src={catPreview} alt="Preview" className="w-full h-32 object-cover rounded-xl mb-2 border border-border" />
+                <img 
+                  src={catPreview} 
+                  alt="Preview" 
+                  className="w-full h-32 object-cover rounded-xl mb-2 border border-border cursor-pointer hover:opacity-80 transition-opacity" 
+                  onClick={() => {
+                    setCropperSrc(catPreview);
+                    setCropperTarget("category");
+                    setCropperOpen(true);
+                  }}
+                />
               )}
               <Input className="rounded-xl" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "category"); }} />
             </div>
@@ -673,7 +701,16 @@ const Admin = () => {
                 <span className="font-normal text-[10px]">(Arraste a imagem aqui ou clique e cole com Ctrl+V)</span>
               </label>
               {prodPreview && (
-                <img src={prodPreview} alt="Preview" className="w-full h-40 object-cover rounded-xl mb-3 border border-border shadow-sm" />
+                <img 
+                  src={prodPreview} 
+                  alt="Preview" 
+                  className="w-full h-40 object-cover rounded-xl mb-3 border border-border shadow-sm cursor-pointer hover:opacity-80 transition-opacity" 
+                  onClick={() => {
+                    setCropperSrc(prodPreview);
+                    setCropperTarget("product");
+                    setCropperOpen(true);
+                  }}
+                />
               )}
               <Input className="rounded-xl cursor-pointer" type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f, "product"); e.target.value = ''; }} />
             </div>
@@ -694,9 +731,19 @@ const Admin = () => {
                 {/* Existing saved images */}
                 {extraImages.map((img) => (
                   <div key={img.id} className="relative group">
-                    <img src={img.url} alt="Extra" className="w-full aspect-square object-cover rounded-xl border border-border" />
+                    <img 
+                      src={img.url} 
+                      alt="Extra" 
+                      className="w-full aspect-square object-cover rounded-xl border border-border cursor-pointer hover:opacity-80 transition-opacity" 
+                      onClick={() => {
+                        setCropperSrc(img.url);
+                        setCropperTarget("extra_existing");
+                        setEditingExtraId(img.id);
+                        setCropperOpen(true);
+                      }}
+                    />
                     <button
-                      onClick={() => deleteExtraImage(img)}
+                      onClick={(e) => { e.stopPropagation(); deleteExtraImage(img); }}
                       className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-3 w-3" />
@@ -706,9 +753,19 @@ const Admin = () => {
                 {/* Pending (not yet saved) images */}
                 {pendingExtraFiles.map((item, i) => (
                   <div key={`pending-${i}`} className="relative group">
-                    <img src={item.preview} alt="Nova" className="w-full aspect-square object-cover rounded-xl border-2 border-dashed border-primary/40" />
+                    <img 
+                      src={item.preview} 
+                      alt="Nova" 
+                      className="w-full aspect-square object-cover rounded-xl border-2 border-dashed border-primary/40 cursor-pointer hover:opacity-80 transition-opacity" 
+                      onClick={() => {
+                        setCropperSrc(item.preview);
+                        setCropperTarget("extra_pending");
+                        setEditingPendingIndex(i);
+                        setCropperOpen(true);
+                      }}
+                    />
                     <button
-                      onClick={() => removePendingExtra(i)}
+                      onClick={(e) => { e.stopPropagation(); removePendingExtra(i); }}
                       className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-3 w-3" />
