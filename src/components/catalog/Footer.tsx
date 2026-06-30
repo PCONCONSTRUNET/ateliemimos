@@ -7,8 +7,8 @@ interface FooterProps {
 
 export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
   return (
-    <footer className="w-full px-4 pb-4">
-      <div className="bg-gradient-to-t from-primary/15 via-primary/5 to-card border border-border rounded-2xl p-8 text-center space-y-4">
+    <footer className="w-full mt-4">
+      <div className="bg-gradient-to-t from-primary/15 via-primary/5 to-card border-t border-border rounded-t-3xl p-8 pb-12 text-center space-y-4">
         {/* Divider line */}
         <div className="w-20 h-[3px] bg-primary/50 mx-auto mb-2 rounded-full" />
 
@@ -21,9 +21,12 @@ export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
 
         <div className="w-full h-px bg-border mt-4" />
 
-        <p className="text-[11px] text-muted-foreground">
-          © {new Date().getFullYear()} Ateliê Mimos da Preta — Lisangela Moraes
-        </p>
+        <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+          <p>© {new Date().getFullYear()} Ateliê Mimos da Preta — Lisangela Moraes</p>
+          <p>
+            Desenvolvido por <a href="https://www.instagram.com/pconconstrunet/" target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">P-CON CONSTRUNET</a>
+          </p>
+        </div>
       </div>
     </footer>
   );

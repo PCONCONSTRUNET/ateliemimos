@@ -1,7 +1,8 @@
-import { Search, Menu, X, ChevronDown, ChevronUp, MessageCircle, Phone } from "lucide-react";
+import { Search, Menu, X, ChevronDown, ChevronUp, ShoppingBag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 import logo from "@/assets/logo.png";
 
 const WHATSAPP_NUMBER = "5548996222795";
@@ -17,6 +18,9 @@ export const Header = ({ searchQuery, onSearchChange, categories, onSelectCatego
   const [menuOpen, setMenuOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const navigate = useNavigate();
+  const { items, setIsCartOpen } = useCart();
+  
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleWhatsApp = () => {
     const message = encodeURIComponent("Olá! Gostaria de saber mais sobre os produtos do ateliê.");
@@ -41,9 +45,26 @@ export const Header = ({ searchQuery, onSearchChange, categories, onSelectCatego
             />
           </div>
 
-          <Link to="/" className="flex-shrink-0">
-            <img src={logo} alt="Ateliê Mimos da Preta" className="h-10 w-10 object-contain" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex-shrink-0">
+              <img src={logo} alt="Ateliê Mimos da Preta" className="h-10 w-10 object-contain" />
+            </Link>
+            
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-1 text-foreground hover:bg-muted rounded-full transition-colors"
+            >
+              <ShoppingBag key={`icon-${itemCount}`} className="h-6 w-6 text-foreground animate-in zoom-in-75 duration-300" />
+              {itemCount > 0 && (
+                <span 
+                  key={`badge-${itemCount}`}
+                  className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-primary-foreground bg-primary rounded-full animate-in zoom-in duration-300 shadow-sm"
+                >
+                  {itemCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 

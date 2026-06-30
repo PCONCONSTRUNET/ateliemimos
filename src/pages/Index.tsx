@@ -10,6 +10,7 @@ import { WhatsAppButton } from "@/components/catalog/WhatsAppButton";
 import { Footer } from "@/components/catalog/Footer";
 import { useNavigate } from "react-router-dom";
 import { SlidersHorizontal, X } from "lucide-react";
+import { createSlug } from "@/lib/utils";
 
 interface ProductImage {
   id: string;
@@ -131,13 +132,21 @@ const Index = () => {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
+  const navigateToCategory = (id: string | null) => {
+    if (!id) return;
+    const cat = categories.find((c) => c.id === id);
+    if (cat) {
+      navigate(`/catalogo/${createSlug(cat.nome)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         categories={categories}
-        onSelectCategory={(id) => id && navigate(`/categoria/${id}`)}
+        onSelectCategory={navigateToCategory}
       />
 
       {/* Hero */}
@@ -245,7 +254,7 @@ const Index = () => {
         <div className="container mx-auto px-4 pt-4">
           <CategoryScrollBar
             categories={categories}
-            onSelect={(id) => navigate(`/categoria/${id}`)}
+            onSelect={navigateToCategory}
           />
         </div>
       )}
@@ -288,7 +297,7 @@ const Index = () => {
                 </h2>
                 <CategoryGrid
                   categories={categories}
-                  onSelect={(id) => navigate(`/categoria/${id}`)}
+                  onSelect={navigateToCategory}
                 />
               </section>
             )}
@@ -310,7 +319,7 @@ const Index = () => {
         )}
       </main>
 
-      <Footer categories={categories} onSelectCategory={(id) => id && navigate(`/categoria/${id}`)} />
+      <Footer categories={categories} onSelectCategory={navigateToCategory} />
       <WhatsAppButton />
 
       <ProductModal

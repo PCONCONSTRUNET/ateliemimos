@@ -6,6 +6,7 @@ import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { ProductModal } from "@/components/catalog/ProductModal";
 import { WhatsAppButton } from "@/components/catalog/WhatsAppButton";
 import { Footer } from "@/components/catalog/Footer";
+import { createSlug } from "@/lib/utils";
 
 interface Category {
   id: string;
@@ -26,7 +27,7 @@ interface Product {
 }
 
 const CategoryPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
@@ -38,20 +39,30 @@ const CategoryPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [slug]);
 
   const fetchData = async () => {
-    const [catRes, catAllRes, prodRes] = await Promise.all([
-      supabase.from("categories").select("*").eq("id", id!).single(),
-      supabase.from("categories").select("*").order("nome"),
-      supabase.from("products").select("*").eq("categoria_id", id!).order("position", { ascending: true }),
-    ]);
-    if (catRes.data) setCategory(catRes.data);
-    if (catAllRes.data) setCategories(catAllRes.data);
-    if (prodRes.data) {
-      setProducts(prodRes.data);
-      // Fetch images for these products
-      const prodIds = prodRes.data.map((p: Product) => p.id);
+    const { data: allCats } = await supabase.from("categories").select("*").order("nome");
+    if (!allCats) return;
+    setCategories(allCats);
+    
+    const targetCat = allCats.find((c) => createSlug(c.nome) === slug);
+    if (!targetCat) {
+      navigate("/");
+      return;
+    }
+    
+    setCategory(targetCat);
+
+    const { data: prodData } = await supabase
+      .from("products")
+      .select("*")
+      .eq("categoria_id", targetCat.id)
+      .order("position", { ascending: true });
+      
+    if (prodData) {
+      setProducts(prodData);
+      const prodIds = prodData.map((p: Product) => p.id);
       if (prodIds.length > 0) {
         const { data: imgData } = await supabase
           .from("product_images")
@@ -76,13 +87,23 @@ const CategoryPage = () => {
     return categories.find((c) => c.id === catId)?.nome || "";
   };
 
+  const navigateToCategory = (catId: string | null) => {
+    if (!catId) return;
+    const cat = categories.find((c) => c.id === catId);
+    if (cat) {
+      navigate(`/catalogo/${createSlug(cat.nome)}`);
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         categories={categories}
-        onSelectCategory={(catId) => catId ? navigate(`/categoria/${catId}`) : navigate("/")}
+        onSelectCategory={navigateToCategory}
       />
 
       <main className="container mx-auto px-4 pb-24">
@@ -110,7 +131,7 @@ const CategoryPage = () => {
         </section>
       </main>
 
-      <Footer categories={categories} onSelectCategory={(catId) => catId && navigate(`/categoria/${catId}`)} />
+      <Footer categories={categories} onSelectCategory={navigateToCategory} />
       <WhatsAppButton />
 
       <ProductModal

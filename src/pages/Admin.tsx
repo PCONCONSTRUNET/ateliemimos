@@ -10,12 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Plus, Pencil, Trash2, X, ImagePlus, GripVertical } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, X, ImagePlus, GripVertical, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { ImageCropper } from "@/components/catalog/ImageCropper";
 
-// Aceita formatos: "1650", "1650.00", "1650,00", "1.650,00", "1,650.00"
 const parseBRL = (input: string): number => {
   if (!input) return 0;
   let s = String(input).trim().replace(/[^\d.,-]/g, "");
@@ -23,14 +22,12 @@ const parseBRL = (input: string): number => {
   const hasComma = s.includes(",");
   const hasDot = s.includes(".");
   if (hasComma && hasDot) {
-    // separador decimal é o último símbolo
     if (s.lastIndexOf(",") > s.lastIndexOf(".")) {
       s = s.replace(/\./g, "").replace(",", ".");
     } else {
       s = s.replace(/,/g, "");
     }
   } else if (hasComma) {
-    // só vírgula -> decimal BR
     s = s.replace(/\./g, "").replace(",", ".");
   }
   const n = parseFloat(s);
@@ -69,16 +66,30 @@ interface ProductVariation {
   preco: string;
 }
 
+interface Coupon {
+  id: string;
+  code: string;
+  discount_percent: number;
+  discount_type?: "percent" | "fixed";
+  active: boolean;
+  usage_limit?: number | null;
+  uses?: number;
+}
+
 const Admin = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [catModal, setCatModal] = useState(false);
   const [prodModal, setProdModal] = useState(false);
+  const [couponModal, setCouponModal] = useState(false);
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [editingProd, setEditingProd] = useState<Product | null>(null);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [catForm, setCatForm] = useState({ nome: "", imagem: null as File | null, visivel: true });
+  const [couponForm, setCouponForm] = useState<{ code: string; discount_percent: string; discount_type: "percent" | "fixed"; active: boolean; usage_limit: string }>({ code: "", discount_percent: "", discount_type: "percent", active: true, usage_limit: "" });
   const [prodForm, setProdForm] = useState({
     nome: "",
     preco: "",
@@ -102,7 +113,7 @@ const Admin = () => {
   const [pendingExtraFiles, setPendingExtraFiles] = useState<{ file: File; preview: string }[]>([]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "product" | "category"; id: string; name: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "product" | "category" | "coupon"; id: string; name: string } | null>(null);
   const navigate = useNavigate();
 
   const handleMultipleFiles = (files: FileList | File[]) => {
@@ -219,12 +230,14 @@ const Admin = () => {
   }, [session]);
 
   const fetchAll = async () => {
-    const [c, p] = await Promise.all([
+    const [c, p, couponsData] = await Promise.all([
       supabase.from("categories").select("*").order("position", { ascending: true }),
       supabase.from("products").select("*").order("position", { ascending: true }),
+      supabase.from("coupons").select("*").order("created_at", { ascending: false })
     ]);
     if (c.data) setCategories(c.data);
     if (p.data) setProducts(p.data);
+    if (couponsData.data) setCoupons(couponsData.data);
   };
 
   const uploadImage = async (file: File, folder: string): Promise<string | null> => {
@@ -360,7 +373,6 @@ const Admin = () => {
       if (inserted) productId = inserted.id;
     }
 
-    // Upload pending extra images
     if (productId && pendingExtraFiles.length > 0) {
       const startPos = extraImages.length;
       for (let i = 0; i < pendingExtraFiles.length; i++) {
@@ -375,9 +387,7 @@ const Admin = () => {
       }
     }
 
-    // Save variations
     if (productId) {
-      // Delete existing variations first (simple approach)
       await supabase.from("product_variations").delete().eq("product_id", productId);
       
       if (prodForm.variations.length > 0) {
@@ -414,6 +424,52 @@ const Admin = () => {
     await supabase.from("products").delete().eq("id", id);
     fetchAll();
     toast.success("Produto excluído!");
+  };
+
+  const openCouponModal = (coupon?: Coupon) => {
+    if (coupon) {
+      setEditingCoupon(coupon);
+      setCouponForm({ 
+        code: coupon.code, 
+        discount_percent: String(coupon.discount_percent), 
+        discount_type: coupon.discount_type || "percent", 
+        active: coupon.active,
+        usage_limit: coupon.usage_limit ? String(coupon.usage_limit) : ""
+      });
+    } else {
+      setEditingCoupon(null);
+      setCouponForm({ code: "", discount_percent: "", discount_type: "percent", active: true, usage_limit: "" });
+    }
+    setCouponModal(true);
+  };
+
+  const saveCoupon = async () => {
+    const code = couponForm.code.trim().toUpperCase();
+    const discount = parseFloat(couponForm.discount_percent.replace(",", "."));
+    if (!code || isNaN(discount)) return toast.error("Código e desconto são obrigatórios!");
+
+    const limit = parseInt(couponForm.usage_limit, 10);
+    const data = { 
+      code, 
+      discount_percent: discount, 
+      discount_type: couponForm.discount_type, 
+      active: couponForm.active,
+      usage_limit: isNaN(limit) ? null : limit
+    };
+    if (editingCoupon) {
+      await supabase.from("coupons").update(data).eq("id", editingCoupon.id);
+    } else {
+      await supabase.from("coupons").insert(data);
+    }
+    setCouponModal(false);
+    fetchAll();
+    toast.success(editingCoupon ? "Cupom atualizado!" : "Cupom criado!");
+  };
+
+  const deleteCoupon = async (id: string) => {
+    await supabase.from("coupons").delete().eq("id", id);
+    fetchAll();
+    toast.success("Cupom excluído!");
   };
 
   const [activeTab, setActiveTab] = useState("products");
@@ -463,7 +519,6 @@ const Admin = () => {
     toast.success("Ordem atualizada!");
   };
 
-  // Touch drag support
   const touchStartY = { current: 0 };
   const touchDragIdx = { current: -1 };
 
@@ -519,9 +574,10 @@ const Admin = () => {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="products" onValueChange={setActiveTab}>
-          <TabsList className="mb-6 bg-primary/10 rounded-full p-1 h-auto">
+          <TabsList className="mb-6 bg-primary/10 rounded-full p-1 h-auto flex overflow-x-auto no-scrollbar">
             <TabsTrigger value="products" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Produtos ({products.length})</TabsTrigger>
             <TabsTrigger value="categories" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Categorias ({categories.length})</TabsTrigger>
+            <TabsTrigger value="coupons" className="rounded-full px-5 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Cupons ({coupons.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -630,6 +686,52 @@ const Admin = () => {
               {categories.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhuma categoria cadastrada.</p>}
             </div>
           </TabsContent>
+
+          <TabsContent value="coupons">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-serif">Cupons de Desconto</h2>
+              <Button onClick={() => openCouponModal()} className="gap-2 rounded-full">
+                <Plus className="h-4 w-4" /> Novo Cupom
+              </Button>
+            </div>
+            <div className="grid gap-3">
+              {coupons.map((c) => (
+                <Card key={c.id} className="rounded-2xl">
+                  <CardContent className="flex items-center gap-4 p-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Ticket className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-lg truncate uppercase">{c.code}</h3>
+                        <span className="text-sm font-semibold text-primary">
+                          {c.discount_type === "fixed" 
+                            ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(c.discount_percent)
+                            : `${c.discount_percent}% OFF`
+                          }
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {!c.active && (
+                          <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-semibold inline-block">Inativo</span>
+                        )}
+                        {c.usage_limit !== null && c.usage_limit !== undefined && (
+                          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold inline-block">
+                            Usos: {c.uses || 0} / {c.usage_limit}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => openCouponModal(c)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ type: "coupon", id: c.id, name: c.code })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {coupons.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhum cupom cadastrado.</p>}
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
 
@@ -728,7 +830,6 @@ const Admin = () => {
                 <span className="font-normal text-[10px]">(Arraste imagens aqui ou clique e cole com Ctrl+V)</span>
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {/* Existing saved images */}
                 {extraImages.map((img) => (
                   <div key={img.id} className="relative group">
                     <img 
@@ -750,7 +851,6 @@ const Admin = () => {
                     </button>
                   </div>
                 ))}
-                {/* Pending (not yet saved) images */}
                 {pendingExtraFiles.map((item, i) => (
                   <div key={`pending-${i}`} className="relative group">
                     <img 
@@ -772,7 +872,6 @@ const Admin = () => {
                     </button>
                   </div>
                 ))}
-                {/* Add button */}
                 <label className="w-full aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
                   <ImagePlus className="h-5 w-5 text-muted-foreground mb-1" />
                   <span className="text-[10px] text-muted-foreground text-center leading-tight">Adicionar<br/>(Múltiplas)</span>
@@ -882,24 +981,74 @@ const Admin = () => {
         onCancel={() => { setCropperOpen(false); setCropperSrc(""); }}
       />
 
-      {/* Delete Confirmation Modal */}
-      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
-        <AlertDialogContent className="max-w-sm rounded-2xl">
+      {/* Coupon Modal */}
+      <Dialog open={couponModal} onOpenChange={setCouponModal}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 gap-0">
+          <DialogHeader className="p-5 pb-3">
+            <DialogTitle className="font-serif text-lg">{editingCoupon ? "Editar Cupom" : "Novo Cupom"}</DialogTitle>
+            <DialogDescription className="sr-only">Formulário de cupom</DialogDescription>
+          </DialogHeader>
+          <div className="px-5 pb-5 space-y-4">
+            <Input 
+              className="rounded-2xl h-14 uppercase text-lg font-bold border-2 border-primary/20 bg-background focus-visible:ring-primary/40 focus-visible:border-primary placeholder:text-sm placeholder:font-medium transition-all" 
+              placeholder="CÓDIGO DO CUPOM (EX: MAE10)" 
+              value={couponForm.code} 
+              onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })} 
+            />
+            <div className="flex gap-2">
+              <Select value={couponForm.discount_type} onValueChange={(v) => setCouponForm({ ...couponForm, discount_type: v as "percent" | "fixed" })}>
+                <SelectTrigger className="rounded-2xl h-14 w-[140px] border-2 border-primary/20">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percent">Porcento (%)</SelectItem>
+                  <SelectItem value="fixed">Fixo (R$)</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input 
+                className="rounded-2xl h-14 text-lg font-bold border-2 border-primary/20 bg-background focus-visible:ring-primary/40 focus-visible:border-primary placeholder:text-sm placeholder:font-medium transition-all flex-1" 
+                placeholder={couponForm.discount_type === "percent" ? "Desconto (%)" : "Desconto (R$)"} 
+                type="number"
+                value={couponForm.discount_percent} 
+                onChange={(e) => setCouponForm({ ...couponForm, discount_percent: e.target.value })} 
+              />
+            </div>
+            
+            <Input 
+              className="rounded-2xl h-14 text-lg font-bold border-2 border-primary/20 bg-background focus-visible:ring-primary/40 focus-visible:border-primary placeholder:text-sm placeholder:font-medium transition-all" 
+              placeholder="Limite de usos (deixe em branco para ilimitado)" 
+              type="number"
+              value={couponForm.usage_limit} 
+              onChange={(e) => setCouponForm({ ...couponForm, usage_limit: e.target.value })} 
+            />
+            
+            <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-xl border border-border/50">
+              <Checkbox id="coupon-active" checked={couponForm.active} onCheckedChange={(c) => setCouponForm({ ...couponForm, active: !!c })} />
+              <label htmlFor="coupon-active" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                Cupom Ativo
+              </label>
+            </div>
+            <Button onClick={saveCoupon} className="w-full rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.01]">Salvar Cupom</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
+        <AlertDialogContent className="w-[calc(100%-2rem)] rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif">
-              Excluir {deleteConfirm?.type === "product" ? "produto" : "categoria"}?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir <strong>{deleteConfirm?.name}</strong>? Essa ação não pode ser desfeita.
+              Você está prestes a excluir {deleteConfirm?.type === "product" ? "o produto" : deleteConfirm?.type === "category" ? "a categoria" : "o cupom"}: <strong className="text-foreground">{deleteConfirm?.name}</strong>. Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
                 if (deleteConfirm?.type === "product") deleteProd(deleteConfirm.id);
                 else if (deleteConfirm?.type === "category") deleteCat(deleteConfirm.id);
+                else if (deleteConfirm?.type === "coupon") deleteCoupon(deleteConfirm.id);
                 setDeleteConfirm(null);
               }}
             >
