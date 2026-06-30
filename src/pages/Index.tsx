@@ -67,7 +67,7 @@ const Index = () => {
       setProducts(prodRes.data);
       const prices = prodRes.data.map((p) => p.preco);
       if (prices.length > 0) {
-        setPriceRange([Math.min(...prices), Math.max(...prices)]);
+        setPriceRange([Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))]);
       }
     }
     if (imgRes.data) {
@@ -83,12 +83,12 @@ const Index = () => {
 
   const maxPrice = useMemo(() => {
     if (products.length === 0) return 100;
-    return Math.max(...products.map((p) => p.preco));
+    return Math.ceil(Math.max(...products.map((p) => p.preco)));
   }, [products]);
 
   const minPrice = useMemo(() => {
     if (products.length === 0) return 0;
-    return Math.min(...products.map((p) => p.preco));
+    return Math.floor(Math.min(...products.map((p) => p.preco)));
   }, [products]);
 
   const allTags = useMemo(() => {
@@ -97,7 +97,7 @@ const Index = () => {
     return Array.from(tags).sort();
   }, [products]);
 
-  const hasActiveFilters = !loading && (priceRange[0] > minPrice || priceRange[1] < maxPrice || selectedTags.length > 0);
+  const hasActiveFilters = !loading && products.length > 0 && (priceRange[0] > minPrice || priceRange[1] < maxPrice || selectedTags.length > 0);
 
   const filteredByFilters = useMemo(() => {
     return products.filter((p) => {
