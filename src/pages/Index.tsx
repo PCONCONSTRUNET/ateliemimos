@@ -141,7 +141,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -259,7 +259,7 @@ const Index = () => {
         </div>
       )}
 
-      <main className="container mx-auto px-4 pb-24">
+      <main className="container mx-auto px-4 pb-24 flex-grow">
         {/* Search results */}
         {searchResults ? (
           <section className="py-8">

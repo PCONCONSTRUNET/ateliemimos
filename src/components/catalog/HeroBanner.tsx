@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import logoPrimary from "@/assets/logo-primary.png";
+import logoPrimary from "@/assets/logo-primaria-nova.png";
 
 const WHATSAPP_NUMBER = "5548996222795";
 

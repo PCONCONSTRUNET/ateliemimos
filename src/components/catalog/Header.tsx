@@ -2,8 +2,9 @@ import { Search, Menu, X, ChevronDown, ChevronUp, ShoppingBag } from "lucide-rea
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import logo from "@/assets/logo-primaria-nova.png";
 import { useCart } from "@/contexts/CartContext";
-import logo from "@/assets/logo.png";
 
 const WHATSAPP_NUMBER = "5548996222795";
 

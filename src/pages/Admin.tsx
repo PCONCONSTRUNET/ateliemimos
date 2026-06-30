@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Plus, Pencil, Trash2, X, ImagePlus, GripVertical, Ticket } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-primaria-nova.png";
 import { ImageCropper } from "@/components/catalog/ImageCropper";
 
 const parseBRL = (input: string): number => {

@@ -1,4 +1,4 @@
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-primaria-nova.png";
 
 interface FooterProps {
   categories?: { id: string; nome: string }[];
@@ -22,7 +22,7 @@ export const Footer = ({ categories = [], onSelectCategory }: FooterProps) => {
         <div className="w-full h-px bg-border mt-4" />
 
         <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-          <p>© {new Date().getFullYear()} Ateliê Mimos da Preta — Lisangela Moraes</p>
+          <p>© {new Date().getFullYear()} Ateliê Mimos da Preta</p>
           <p>
             Desenvolvido por <a href="https://www.instagram.com/pconconstrunet/" target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">P-CON CONSTRUNET</a>
           </p>

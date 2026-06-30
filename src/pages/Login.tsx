@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/logo-primaria-nova.png";
 import { useNavigate } from "react-router-dom";
-import logo from "@/assets/logo.png";
 
 const Login = () => {
   const [username, setUsername] = useState("");
