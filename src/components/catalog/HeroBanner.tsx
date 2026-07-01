@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import logoPrimary from "@/assets/logo-primaria-nova.png";
+import logoPrimary from "@/assets/mimos-sem-fundo.png";
 
 const WHATSAPP_NUMBER = "5548996222795";
 
@@ -10,7 +10,7 @@ export const HeroBanner = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
+    <section className="relative overflow-hidden bg-background">
       <div className="px-6 py-10 text-center space-y-4">
         <img src={logoPrimary} alt="Ateliê Mimos da Preta" className="h-44 mx-auto object-contain" />
 

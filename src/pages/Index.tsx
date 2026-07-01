@@ -4,6 +4,7 @@ import { Header } from "@/components/catalog/Header";
 import { HeroBanner } from "@/components/catalog/HeroBanner";
 import { CategoryScrollBar } from "@/components/catalog/CategoryScrollBar";
 import { CategoryGrid } from "@/components/catalog/CategoryGrid";
+import { BannerCarousel } from "@/components/catalog/BannerCarousel";
 import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { ProductModal } from "@/components/catalog/ProductModal";
 import { WhatsAppButton } from "@/components/catalog/WhatsAppButton";
@@ -150,7 +151,13 @@ const Index = () => {
       />
 
       {/* Hero */}
-      {!searchQuery && !hasActiveFilters && <HeroBanner />}
+      {!searchQuery && !hasActiveFilters && (
+        <>
+          <HeroBanner />
+          {/* Carousel Experimental */}
+          <BannerCarousel />
+        </>
+      )}
 
       {/* Filter toggle */}
       <div className="container mx-auto px-4 pt-3">
@@ -187,6 +194,26 @@ const Index = () => {
       {showFilters && (
         <div className="container mx-auto px-4 pt-3 pb-1 animate-fade-in">
           <div className="bg-card border border-border rounded-2xl p-4 space-y-4">
+            {/* Categories Quick Filter */}
+            {categories.length > 0 && (
+              <div>
+                <label className="text-xs font-semibold text-foreground mb-2 block">
+                  📂 Categorias Rápidas
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => navigateToCategory(cat.id)}
+                      className="px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors bg-muted text-foreground border border-border hover:bg-primary hover:text-primary-foreground"
+                    >
+                      {cat.nome}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Price range */}
             <div>
               <label className="text-xs font-semibold text-foreground mb-2 block">

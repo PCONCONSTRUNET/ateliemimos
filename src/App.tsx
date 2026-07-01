@@ -7,7 +7,11 @@ import CategoryPage from "./pages/CategoryPage.tsx";
 import Login from "./pages/Login.tsx";
 import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Terms from "./pages/Terms.tsx";
+import Privacy from "./pages/Privacy.tsx";
 import { CartProvider } from "./contexts/CartContext.tsx";
+import { FavoritesProvider } from "./contexts/FavoritesContext.tsx";
+import { FavoritesSheet } from "./components/catalog/FavoritesSheet.tsx";
 import { CartSheet } from "./components/catalog/CartSheet.tsx";
 
 const queryClient = new QueryClient();
@@ -15,19 +19,24 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CartProvider>
-      <TooltipProvider>
-        <Toaster />
-        <BrowserRouter>
-          <CartSheet />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/catalogo/:slug" element={<CategoryPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <FavoritesProvider>
+        <TooltipProvider>
+          <Toaster />
+          <BrowserRouter>
+            <CartSheet />
+            <FavoritesSheet />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/catalogo/:slug" element={<CategoryPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/termos" element={<Terms />} />
+              <Route path="/privacidade" element={<Privacy />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </FavoritesProvider>
     </CartProvider>
   </QueryClientProvider>
 );

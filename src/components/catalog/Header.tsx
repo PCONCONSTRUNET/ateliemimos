@@ -1,10 +1,11 @@
-import { Search, Menu, X, ChevronDown, ChevronUp, ShoppingBag } from "lucide-react";
+import { Search, Menu, X, ChevronDown, ChevronUp, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/logo-primaria-nova.png";
 import { useCart } from "@/contexts/CartContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 const WHATSAPP_NUMBER = "5548996222795";
 
@@ -20,8 +21,10 @@ export const Header = ({ searchQuery, onSearchChange, categories, onSelectCatego
   const [catOpen, setCatOpen] = useState(false);
   const navigate = useNavigate();
   const { items, setIsCartOpen } = useCart();
+  const { favorites, setIsFavoritesOpen } = useFavorites();
   
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const favCount = favorites.length;
 
   const handleWhatsApp = () => {
     const message = encodeURIComponent("Olá! Gostaria de saber mais sobre os produtos do ateliê.");
@@ -47,15 +50,26 @@ export const Header = ({ searchQuery, onSearchChange, categories, onSelectCatego
           </div>
 
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex-shrink-0">
-              <img src={logo} alt="Ateliê Mimos da Preta" className="h-10 w-10 object-contain" />
-            </Link>
-            
+            <button 
+              onClick={() => setIsFavoritesOpen(true)}
+              className="relative p-1 text-foreground hover:bg-muted rounded-full transition-colors"
+            >
+              <Heart className="h-6 w-6 text-foreground" />
+              {favCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-primary-foreground bg-rose-500 rounded-full animate-in zoom-in duration-300 shadow-sm">
+                  {favCount}
+                </span>
+              )}
+            </button>
             <button 
               onClick={() => setIsCartOpen(true)}
               className="relative p-1 text-foreground hover:bg-muted rounded-full transition-colors"
             >
-              <ShoppingBag key={`icon-${itemCount}`} className="h-6 w-6 text-foreground animate-in zoom-in-75 duration-300" />
+              <svg key={`icon-${itemCount}`} xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" strokeLinejoin="round" strokeLinecap="round" viewBox="0 0 24 24" strokeWidth={2} fill="none" stroke="currentColor" className="h-6 w-6 text-foreground animate-in zoom-in-75 duration-300">
+                <circle r={1} cy={21} cx={9} />
+                <circle r={1} cy={21} cx={20} />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
               {itemCount > 0 && (
                 <span 
                   key={`badge-${itemCount}`}

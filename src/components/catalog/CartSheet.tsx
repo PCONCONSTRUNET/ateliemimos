@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import logo from "@/assets/mimos-sem-fundo.png";
 
 const WHATSAPP_NUMBER = "5548996222795";
 
@@ -57,20 +58,27 @@ export function CartSheet() {
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-background/95 backdrop-blur-xl border-l-0 sm:border-l p-0">
         <SheetHeader className="text-left border-b p-6 pb-4">
-          <SheetTitle className="flex items-center gap-2 text-xl font-serif">
-            <ShoppingBag className="w-5 h-5" />
+          <SheetTitle className="flex items-center gap-2 text-2xl font-serif text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" strokeLinejoin="round" strokeLinecap="round" viewBox="0 0 24 24" strokeWidth={2} fill="none" stroke="currentColor" className="w-6 h-6">
+              <circle r={1} cy={21} cx={9} />
+              <circle r={1} cy={21} cx={20} />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
             Meu Carrinho
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-foreground/80 font-medium text-sm mt-1">
             Revise seus itens e finalize o pedido via WhatsApp.
           </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-4 px-6 space-y-4">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-3">
-              <ShoppingBag className="w-12 h-12 opacity-20" />
-              <p>Seu carrinho está vazio.</p>
+            <div className="flex flex-col items-center justify-center h-full text-foreground space-y-4">
+              <div className="w-32 h-32 mb-2 flex items-center justify-center">
+                <img src={logo} alt="Ateliê Mimos da Preta" className="w-full h-full object-contain opacity-90 drop-shadow-sm" />
+              </div>
+              <p className="font-bold text-lg">Seu carrinho está vazio.</p>
+              <p className="text-sm text-muted-foreground text-center">Navegue pelos produtos e adicione os que você mais gostou!</p>
             </div>
           ) : (
             items.map(({ product, quantity }) => (

@@ -1,4 +1,6 @@
 import { Badge } from "@/components/ui/badge";
+import { Heart } from "lucide-react";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface Product {
   id: string;
@@ -15,6 +17,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, onClick }: ProductCardProps) => {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(product.id);
+
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
@@ -47,6 +52,17 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
               ✨ Destaque
             </Badge>
           )}
+        </div>
+        <div className="absolute top-2 right-2 z-10">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(product);
+            }}
+            className="p-1.5 bg-background/80 hover:bg-background rounded-full backdrop-blur-sm shadow-sm transition-colors"
+          >
+            <Heart className={`w-4 h-4 ${favorite ? 'fill-rose-500 text-rose-500' : 'text-muted-foreground'}`} />
+          </button>
         </div>
         {!product.disponivel && (
           <div className="absolute inset-0 bg-background/40" />
