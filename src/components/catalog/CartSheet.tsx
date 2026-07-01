@@ -132,7 +132,7 @@ export function CartSheet() {
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                className="bg-card uppercase pr-24 rounded-full h-10 border-primary/20 focus-visible:ring-primary/30 text-sm"
+                className="bg-card uppercase pr-24 rounded-full h-10 border-primary/20 focus-visible:ring-primary/30 text-[16px]"
               />
               <Button 
                 size="sm"
