@@ -269,11 +269,15 @@ const Admin = () => {
     if (catForm.imagem) {
       imageUrl = await uploadImage(catForm.imagem, "categories");
     }
-    const data = { nome: catForm.nome, imagem: imageUrl, visivel: catForm.visivel };
+    const data: any = { nome: catForm.nome, imagem: imageUrl, visivel: catForm.visivel };
+    
     if (editingCat) {
-      await supabase.from("categories").update(data).eq("id", editingCat.id);
+      const { error } = await supabase.from("categories").update(data).eq("id", editingCat.id);
+      if (error) return toast.error("Erro ao atualizar categoria: " + error.message);
     } else {
-      await supabase.from("categories").insert(data);
+      data.position = categories.length;
+      const { error } = await supabase.from("categories").insert(data);
+      if (error) return toast.error("Erro ao criar categoria: " + error.message);
     }
     setCatModal(false);
     fetchAll();
@@ -367,9 +371,12 @@ const Admin = () => {
 
     let productId = editingProd?.id;
     if (editingProd) {
-      await supabase.from("products").update(data).eq("id", editingProd.id);
+      const { error } = await supabase.from("products").update(data).eq("id", editingProd.id);
+      if (error) return toast.error("Erro ao atualizar produto: " + error.message);
     } else {
-      const { data: inserted } = await supabase.from("products").insert(data).select("id").single();
+      (data as any).position = products.length;
+      const { data: inserted, error } = await supabase.from("products").insert(data).select("id").single();
+      if (error) return toast.error("Erro ao criar produto: " + error.message);
       if (inserted) productId = inserted.id;
     }
 
@@ -457,9 +464,11 @@ const Admin = () => {
       usage_limit: isNaN(limit) ? null : limit
     };
     if (editingCoupon) {
-      await supabase.from("coupons").update(data).eq("id", editingCoupon.id);
+      const { error } = await supabase.from("coupons").update(data).eq("id", editingCoupon.id);
+      if (error) return toast.error("Erro ao atualizar cupom: " + error.message);
     } else {
-      await supabase.from("coupons").insert(data);
+      const { error } = await supabase.from("coupons").insert(data);
+      if (error) return toast.error("Erro ao criar cupom: " + error.message);
     }
     setCouponModal(false);
     fetchAll();
