@@ -235,6 +235,11 @@ const Admin = () => {
       supabase.from("products").select("*").order("position", { ascending: true }),
       supabase.from("coupons").select("*").order("created_at", { ascending: false })
     ]);
+    
+    if (c.error) toast.error("Erro ao carregar categorias: " + c.error.message);
+    if (p.error) toast.error("Erro ao carregar produtos: " + p.error.message);
+    if (couponsData.error) toast.error("Erro ao carregar cupons: " + couponsData.error.message);
+    
     if (c.data) setCategories(c.data);
     if (p.data) setProducts(p.data);
     if (couponsData.data) setCoupons(couponsData.data);
