@@ -990,7 +990,7 @@ const Admin = () => {
       <ImageCropper
         open={cropperOpen}
         imageSrc={cropperSrc}
-        aspect={cropperTarget === "category" ? 16 / 9 : 1}
+        aspect={cropperTarget === "category" ? 16 / 9 : undefined}
         onCropComplete={handleCropComplete}
         onCancel={() => { setCropperOpen(false); setCropperSrc(""); }}
       />
