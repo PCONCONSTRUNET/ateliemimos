@@ -22,13 +22,21 @@ interface ImageCropperProps {
 
 function getCroppedCanvas(
   image: HTMLImageElement,
-  crop: PixelCrop
+  crop: PixelCrop | Crop // We will pass percentCrop here
 ): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  const scaleX = image.naturalWidth / image.width;
-  const scaleY = image.naturalHeight / image.height;
-  canvas.width = crop.width * scaleX;
-  canvas.height = crop.height * scaleY;
+  
+  let scaleX, scaleY;
+  if (crop.unit === '%') {
+    scaleX = image.naturalWidth / 100;
+    scaleY = image.naturalHeight / 100;
+  } else {
+    scaleX = image.naturalWidth / image.width;
+    scaleY = image.naturalHeight / image.height;
+  }
+
+  canvas.width = Math.max(1, crop.width * scaleX);
+  canvas.height = Math.max(1, crop.height * scaleY);
   const ctx = canvas.getContext("2d")!;
   ctx.drawImage(
     image,
@@ -54,7 +62,7 @@ export const ImageCropper = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const [aspect, setAspect] = useState<number | undefined>(initialAspect);
   const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
+  const [completedCrop, setCompletedCrop] = useState<Crop | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -68,13 +76,16 @@ export const ImageCropper = ({
     const { width, height } = e.currentTarget;
     const initialCrop = aspect 
       ? centerCrop(makeAspectCrop({ unit: "%", width: 90 }, aspect, width, height), width, height)
-      : { unit: "%" as const, x: 0, y: 0, width: 100, height: 100 };
+      : { unit: "%" as const, x: 5, y: 5, width: 90, height: 90 };
     setCrop(initialCrop);
+    setCompletedCrop(initialCrop);
   };
 
   const selectAll = () => {
     setAspect(undefined);
-    setCrop({ unit: "%", x: 0, y: 0, width: 100, height: 100 });
+    const fullCrop = { unit: "%" as const, x: 0, y: 0, width: 100, height: 100 };
+    setCrop(fullCrop);
+    setCompletedCrop(fullCrop);
   };
 
   const handleConfirm = useCallback(() => {
@@ -109,6 +120,7 @@ export const ImageCropper = ({
             ? centerCrop(makeAspectCrop({ unit: "%", width: 90 }, value, width, height), width, height)
             : { unit: "%" as const, x: 5, y: 5, width: 90, height: 90 };
           setCrop(newCrop);
+          setCompletedCrop(newCrop);
         }
       }}
     >
@@ -150,7 +162,7 @@ export const ImageCropper = ({
             <ReactCrop
               crop={crop}
               onChange={(c) => setCrop(c)}
-              onComplete={(c) => setCompletedCrop(c)}
+              onComplete={(c, percentCrop) => setCompletedCrop(percentCrop)}
               aspect={aspect}
               className="max-h-[50vh]"
             >
