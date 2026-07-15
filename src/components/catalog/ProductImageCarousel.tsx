@@ -125,7 +125,7 @@ export const ProductImageCarousel = ({ images, alt, className = "" }: ProductIma
       </div>
 
       {isLightboxOpen && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center pointer-events-auto">
           {/* Close button */}
           <button 
             onClick={() => setIsLightboxOpen(false)}
