@@ -412,7 +412,12 @@ const Admin = () => {
           }));
         
         if (varsToInsert.length > 0) {
-          await supabase.from("product_variations").insert(varsToInsert);
+          const { error: varError } = await supabase.from("product_variations").insert(varsToInsert);
+          if (varError) {
+            console.error("Erro ao inserir variações:", varError);
+            toast.error("Erro ao salvar opções do produto");
+            return;
+          }
         }
       }
     }

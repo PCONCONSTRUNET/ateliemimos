@@ -51,11 +51,12 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
 
   const fetchVariations = async () => {
     if (!product) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("product_variations")
       .select("*")
       .eq("product_id", product.id)
       .order("preco", { ascending: true });
+    if (error) console.error("Erro ao buscar variações:", error);
     if (data) setVariations(data);
   };
 
