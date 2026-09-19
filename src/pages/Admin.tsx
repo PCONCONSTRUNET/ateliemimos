@@ -51,6 +51,7 @@ interface Product {
   destaque: boolean;
   disponivel: boolean;
   tags?: string[];
+  subtitulo?: string | null;
 }
 
 interface ProductImage {
@@ -99,6 +100,7 @@ const Admin = () => {
     disponivel: true,
     imagem: null as File | null,
     tags: "",
+    subtitulo: "",
     variations: [] as ProductVariation[],
   });
   const [cropperOpen, setCropperOpen] = useState(false);
@@ -326,6 +328,7 @@ const Admin = () => {
         disponivel: prod.disponivel,
         imagem: null,
         tags: (prod.tags || []).join(", "),
+        subtitulo: prod.subtitulo || "",
         variations: [],
       });
       setProdPreview(prod.imagem || null);
@@ -346,6 +349,7 @@ const Admin = () => {
         disponivel: true, 
         imagem: null, 
         tags: "",
+        subtitulo: "",
         variations: []
       });
       setProdPreview(null);
@@ -372,6 +376,7 @@ const Admin = () => {
       disponivel: prodForm.disponivel,
       imagem: imageUrl,
       tags: tagsArray,
+      subtitulo: prodForm.subtitulo || null,
     };
 
     let productId = editingProd?.id;
@@ -799,6 +804,7 @@ const Admin = () => {
           </DialogHeader>
           <div className="px-5 pb-5 space-y-3.5">
             <Input className="rounded-xl h-11" placeholder="Nome do produto" value={prodForm.nome} onChange={(e) => setProdForm({ ...prodForm, nome: e.target.value })} />
+            <Input className="rounded-xl h-11" placeholder="Subtítulo (opcional)" value={prodForm.subtitulo || ""} onChange={(e) => setProdForm({ ...prodForm, subtitulo: e.target.value })} />
             <Input className="rounded-xl h-11" placeholder="Preço (ex: 1.650,00 ou 89,90)" type="text" inputMode="decimal" value={prodForm.preco} onChange={(e) => setProdForm({ ...prodForm, preco: e.target.value })} />
             <Textarea className="rounded-xl min-h-[80px]" placeholder="Descrição do produto" value={prodForm.descricao} onChange={(e) => setProdForm({ ...prodForm, descricao: e.target.value })} />
             <Select value={prodForm.categoria_id} onValueChange={(v) => setProdForm({ ...prodForm, categoria_id: v })}>

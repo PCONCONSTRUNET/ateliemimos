@@ -23,6 +23,7 @@ interface Product {
   categoria_id: string | null;
   destaque: boolean;
   disponivel: boolean;
+  subtitulo?: string | null;
   tags?: string[];
 }
 

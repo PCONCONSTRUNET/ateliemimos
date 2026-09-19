@@ -9,6 +9,7 @@ interface Product {
   imagem: string | null;
   destaque: boolean;
   disponivel: boolean;
+  subtitulo?: string | null;
 }
 
 interface ProductCardProps {
@@ -72,6 +73,11 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
         <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-snug">
           {product.nome}
         </h3>
+        {product.subtitulo && (
+          <p className="text-xs text-muted-foreground line-clamp-1">
+            {product.subtitulo}
+          </p>
+        )}
         <p className={`font-semibold text-sm ${product.disponivel ? "text-primary" : "text-muted-foreground line-through"}`}>
           {formatPrice(product.preco)}
         </p>

@@ -22,6 +22,7 @@ interface Product {
   destaque: boolean;
   disponivel: boolean;
   tags?: string[];
+  subtitulo?: string | null;
 }
 
 interface ProductVariation {
@@ -120,6 +121,11 @@ export const ProductModal = ({ product, categoryName, onClose, extraImages = [] 
               <DialogTitle className="text-lg font-semibold text-foreground text-left">
                 {product.nome}
               </DialogTitle>
+              {product.subtitulo && (
+                <p className="text-sm text-muted-foreground text-left mt-0.5">
+                  {product.subtitulo}
+                </p>
+              )}
               <DialogDescription className="sr-only">
                 Detalhes do produto {product.nome}
               </DialogDescription>

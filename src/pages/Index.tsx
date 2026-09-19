@@ -37,6 +37,7 @@ interface Product {
   destaque: boolean;
   disponivel: boolean;
   tags?: string[];
+  subtitulo?: string | null;
 }
 
 const Index = () => {

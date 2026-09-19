@@ -14,6 +14,7 @@ CREATE TABLE public.products (
   nome TEXT NOT NULL,
   preco DECIMAL(10,2) NOT NULL DEFAULT 0,
   descricao TEXT,
+  subtitulo TEXT,
   imagem TEXT,
   categoria_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
   destaque BOOLEAN NOT NULL DEFAULT false,

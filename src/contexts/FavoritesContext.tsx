@@ -6,9 +6,10 @@ interface Product {
   nome: string;
   preco: number;
   imagem: string | null;
-  categoria_id?: string | null;
-  destaque?: boolean;
-  disponivel?: boolean;
+  categoria_id: string | null;
+  destaque: boolean;
+  disponivel: boolean;
+  subtitulo?: string | null;
 }
 
 interface FavoritesContextType {
